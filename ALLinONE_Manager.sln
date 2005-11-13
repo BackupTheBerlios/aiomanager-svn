@@ -1,0 +1,37 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIOCommon", "AIOCommon\AIOCommon.csproj", "{B94862DC-BA2F-4F0D-8809-E6DFDC49FC50}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIOForm", "AIOForm\AIOForm.csproj", "{BD324247-3E9E-4A41-B940-8DD98C217C17}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AIOUserControls", "AIOUserControls\AIOUserControls.csproj", "{C22649DA-81C3-410C-A3AA-E849C3311520}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{B94862DC-BA2F-4F0D-8809-E6DFDC49FC50}.Debug.ActiveCfg = Debug|.NET
+		{B94862DC-BA2F-4F0D-8809-E6DFDC49FC50}.Debug.Build.0 = Debug|.NET
+		{B94862DC-BA2F-4F0D-8809-E6DFDC49FC50}.Release.ActiveCfg = Release|.NET
+		{B94862DC-BA2F-4F0D-8809-E6DFDC49FC50}.Release.Build.0 = Release|.NET
+		{BD324247-3E9E-4A41-B940-8DD98C217C17}.Debug.ActiveCfg = Debug|.NET
+		{BD324247-3E9E-4A41-B940-8DD98C217C17}.Debug.Build.0 = Debug|.NET
+		{BD324247-3E9E-4A41-B940-8DD98C217C17}.Release.ActiveCfg = Release|.NET
+		{BD324247-3E9E-4A41-B940-8DD98C217C17}.Release.Build.0 = Release|.NET
+		{C22649DA-81C3-410C-A3AA-E849C3311520}.Debug.ActiveCfg = Debug|.NET
+		{C22649DA-81C3-410C-A3AA-E849C3311520}.Debug.Build.0 = Debug|.NET
+		{C22649DA-81C3-410C-A3AA-E849C3311520}.Release.ActiveCfg = Release|.NET
+		{C22649DA-81C3-410C-A3AA-E849C3311520}.Release.Build.0 = Release|.NET
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal
