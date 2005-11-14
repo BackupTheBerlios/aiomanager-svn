@@ -311,7 +311,7 @@ namespace AIOCommon
 		{
 			for ( int i = 0; i < list.Length; i++ )
 			{
-				if ( str == list[i] )
+				if ( str.Equals( list[i] ) )
 				{
 					return true;
 				}
@@ -323,7 +323,7 @@ namespace AIOCommon
 		{
 			for ( int i = 0; i < list.Count; i++ )
 			{
-				if ( str == list[i] )
+				if ( str.Equals( list[i] ) )
 				{
 					return true;
 				}
