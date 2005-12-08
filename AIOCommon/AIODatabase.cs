@@ -51,29 +51,42 @@ namespace AIOCommon
 
 		public DataTable ExecuteSelect(string selectCmd) 
 		{
-			return null;
+			DataTable dtTable = new DataTable();
+			cmd.CommandText = selectCmd;
+			adapter = new OleDbDataAdapter( selectCmd, cn );
+			adapter.Fill( dtTable);
+			return dtTable;
 		}
 
 		public int ExecuteInsert(string insertCmd) 
 		{
-			return 0;
+			int effects;
+			cmd.CommandText = insertCmd;
+			effects = cmd.ExecuteNonQuery();
+			return effects;
 		}
 
 		public int ExecuteUpdate(string updateCmd) 
 		{
-			return 0;
+			int effects;
+			cmd.CommandText = updateCmd;
+			effects = cmd.ExecuteNonQuery();
+			return effects;
 		}
 
 		public int ExecuteDelete(string deleteCmd) 
 		{
-			return 0;
+			int effects;
+			cmd.CommandText = deleteCmd;
+			effects = cmd.ExecuteNonQuery();
+			return effects;
 		}
 
 		public void DisconnectDB() 
 		{
 			if (cn != null) 
 			{
-				if ( ! cn.State.Equals(ConnectionState.Closed) 
+				if ( ! cn.State.Equals(ConnectionState.Closed) )
 				{					
 					cn.Close();
 				}
