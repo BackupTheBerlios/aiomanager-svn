@@ -62,5 +62,15 @@ namespace AIOCommon
 				return (double)(stopTime - startTime) / (double) freq;
 			}
 		}	
+
+		private long currentTime = 0;
+		public double CurrentDuration
+		{
+			get			
+			{
+				QueryPerformanceCounter(out currentTime);
+				return (double)(currentTime - startTime) / (double) freq;
+			}
+		}	
 	}	
 }

@@ -89,6 +89,11 @@
                     AssemblyName = "System.Xml"
                     HintPath = "C:\WINDOWS\Microsoft.NET\Framework\v1.1.4322\System.XML.dll"
                 />
+                <Reference
+                    Name = "AIOCommon"
+                    Project = "{B94862DC-BA2F-4F0D-8809-E6DFDC49FC50}"
+                    Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
+                />
             </References>
         </Build>
         <Files>
@@ -106,6 +111,26 @@
                 <File
                     RelPath = "DateTextBox.resx"
                     DependentUpon = "DateTextBox.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "LabelCreator.cs"
+                    SubType = "UserControl"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "LabelCreator.resx"
+                    DependentUpon = "LabelCreator.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "LogicalExplorer.cs"
+                    SubType = "UserControl"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "LogicalExplorer.resx"
+                    DependentUpon = "LogicalExplorer.cs"
                     BuildAction = "EmbeddedResource"
                 />
                 <File

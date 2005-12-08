@@ -20,7 +20,7 @@
                 PostBuildEvent = ""
                 RootNamespace = "AIOForm"
                 RunPostBuildEvent = "OnBuildSuccess"
-                StartupObject = ""
+                StartupObject = "AIOForm.frmAIOMain"
             >
                 <Config
                     Name = "Debug"
@@ -99,6 +99,12 @@
                     Project = "{C22649DA-81C3-410C-A3AA-E849C3311520}"
                     Package = "{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}"
                 />
+                <Reference
+                    Name = "CrystalDecisions.Windows.Forms"
+                    AssemblyName = "CrystalDecisions.Windows.Forms"
+                    HintPath = "C:\Program Files\Common Files\Crystal Decisions\1.1\Managed\CrystalDecisions.Windows.Forms.dll"
+                    AssemblyFolderKey = "hklm\crystal.net"
+                />
             </References>
         </Build>
         <Files>
@@ -113,6 +119,96 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "frmAbout.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmAbout.resx"
+                    DependentUpon = "frmAbout.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmAIOMain.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmAIOMain.resx"
+                    DependentUpon = "frmAIOMain.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmBookInfo.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmBookInfo.resx"
+                    DependentUpon = "frmBookInfo.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmCDAddon.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmCDAddon.resx"
+                    DependentUpon = "frmCDAddon.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmCDDVD.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmCDDVD.resx"
+                    DependentUpon = "frmCDDVD.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmChangeModule.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmChangeModule.resx"
+                    DependentUpon = "frmChangeModule.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmCommonInfo.cs"
+                    SubType = "UserControl"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmCommonInfo.resx"
+                    DependentUpon = "frmCommonInfo.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmHelp.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmHelp.resx"
+                    DependentUpon = "frmHelp.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmLogging.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmLogging.resx"
+                    DependentUpon = "frmLogging.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "frmMain.cs"
                     SubType = "Form"
                     BuildAction = "Compile"
@@ -123,9 +219,93 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "frmMovieInfo.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmMovieInfo.resx"
+                    DependentUpon = "frmMovieInfo.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmMusicInfo.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmMusicInfo.resx"
+                    DependentUpon = "frmMusicInfo.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmOptions.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmOptions.resx"
+                    DependentUpon = "frmOptions.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmPhotoInfo.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmPhotoInfo.resx"
+                    DependentUpon = "frmPhotoInfo.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmReport.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmReport.resx"
+                    DependentUpon = "frmReport.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmSearch.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmSearch.resx"
+                    DependentUpon = "frmSearch.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmSubInfo.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmSubInfo.resx"
+                    DependentUpon = "frmSubInfo.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
+                    RelPath = "frmSynchronizeWizard.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmSynchronizeWizard.resx"
+                    DependentUpon = "frmSynchronizeWizard.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "Global.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "licenses.licx"
+                    BuildAction = "EmbeddedResource"
                 />
             </Include>
         </Files>
