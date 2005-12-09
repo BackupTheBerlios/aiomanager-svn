@@ -24,5 +24,13 @@ namespace AIOCommon
 		public AIOInfo(string ID, bool isFile) : this(ID, "", isFile)
 		{
 		}
+		public AIOInfo() {}
+
+		public void Clone(AIOInfo src) 
+		{
+			this.ID = new string(src.ID.ToCharArray());
+			this.Name = new string(src.Name.ToCharArray());
+			this.isFile = src.isFile;
+		}
 	}
 }

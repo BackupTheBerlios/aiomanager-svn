@@ -20,7 +20,7 @@ namespace AIOCommon
 
 		public object container;
 	
-		public AIONode() {}
+		public AIONode() : this(new AIOInfo()) {}
 		public AIONode(AIOInfo data) 
 		{
 			//this.info = info;
@@ -33,9 +33,13 @@ namespace AIOCommon
 			prevIsParent = false;
 		}
 
-		public void Clone(AIONode src) 
+		public void Clone(AIONode src, string newID) 
 		{
-			this.data = src.data;
+		//	if (this.data == null)
+		//		this.data = new AIOInfo(newID, true);
+
+			this.data.Clone(src.data);			
+			this.data.ID = newID;
 		}
 	}
 	/// <summary>
@@ -46,6 +50,7 @@ namespace AIOCommon
 	{
 		public enum AIOModule {MODULE_BOOK, MODULE_MUSIC, MODULE_MOVIE, MODULE_CDDVD, MODULE_PHOTO};
 		public string [] modulePrefix = {"B", "M", "F", "C", "P"};
+		public string directoryPrefix = "#";
 		//module
 		private AIOModule module;
 		public AIOModule Module 
@@ -53,6 +58,10 @@ namespace AIOCommon
 			get {return module;}
 			set {module = value;}
 		}
+		//ID
+		//Save deleted ID to reuse
+		private Queue queueFileID = new Queue();
+		private Queue queueFolderID = new Queue();
 
 		//root
 		private AIONode root;
@@ -78,6 +87,10 @@ namespace AIOCommon
 			{
 				return foldersCount;
 			}
+			set 
+			{
+				foldersCount = value;
+			}
 		}
 
 		public int FilesCount 
@@ -85,6 +98,10 @@ namespace AIOCommon
 			get
 			{
 				return filesCount;
+			}
+			set 
+			{
+				filesCount = value;
 			}
 		}
 
@@ -100,14 +117,31 @@ namespace AIOCommon
 		{
 		}
 
-		public string GenerateID() 
+		public string GenerateFileID() 
 		{
-			string id = "";
-			id = totalCount.ToString();
+			if (queueFileID.Count > 0)
+				return queueFileID.Dequeue().ToString();
+
+			string id = "";			
+			id = filesCount.ToString();
 			int len = id.Length;
 			for(int i = 0;i<6-len;i++)
 				id = "0" + id;
 			id = modulePrefix[(int)module] + id;
+			return id;
+		}
+
+		public string GenerateFolderID() 
+		{
+			if (queueFolderID.Count > 0)
+				return queueFolderID.Dequeue().ToString();
+
+			string id = "";
+			id = foldersCount.ToString();
+			int len = id.Length;
+			for(int i = 0;i<5-len;i++)
+				id = "0" + id;
+			id = directoryPrefix + modulePrefix[(int)module] + id;
 			return id;
 		}
 
@@ -120,8 +154,10 @@ namespace AIOCommon
 			if (di.Exists) 
 			{
 				totalCount = 1;
+				foldersCount = 1;
+				filesCount = 0;
 				//root = new AIONode(di, false);
-				root = new AIONode(new AIOInfo(GenerateID(), di.Name, false));
+				root = new AIONode(new AIOInfo(GenerateFolderID(), di.Name, false));
 				
 				Synchronize_R(di, root, pattern, bRecursive);				
 			}			
@@ -136,8 +172,7 @@ namespace AIOCommon
 			AIONode curChild = null;
 			AIONode preChild = null;
 			if (subDi.Length > 0) //Co thu muc con
-			{
-				foldersCount += subDi.Length;
+			{				
 				totalCount += subDi.Length;
 				AIOProgress.progressValue = foldersCount / 100;
 				Thread.Sleep(1);
@@ -145,7 +180,9 @@ namespace AIOCommon
 				if (bRecursive) 
 				{
 					//First Child
-					AIONode firstChild = new AIONode(new AIOInfo(GenerateID(), subDi[0].Name, false));
+					foldersCount++;
+
+					AIONode firstChild = new AIONode(new AIOInfo(GenerateFolderID(), subDi[0].Name, false));
 					subRoot.childNode = firstChild;
 					//Child
 					curChild = firstChild;
@@ -170,7 +207,9 @@ namespace AIOCommon
 						//Move next
 						if (i < subDi.Length - 1) //Chi xet toi node ke cuoi
 						{
-							curChild.nextNode = new AIONode(new AIOInfo(GenerateID(), subDi[i+1].Name, false));																				
+							foldersCount++;
+
+							curChild.nextNode = new AIONode(new AIOInfo(GenerateFolderID(), subDi[i+1].Name, false));																				
 							curChild = curChild.nextNode;
 						}
 						
@@ -185,10 +224,10 @@ namespace AIOCommon
 			FileInfo [] fileInfo = di.GetFiles(pattern);
 			if (fileInfo.Length > 0) 
 			{
-				filesCount += fileInfo.Length;
 				totalCount += fileInfo.Length;
 				//FirstNode
-				AIONode firstChild = new AIONode(new AIOInfo(GenerateID(), fileInfo[0].Name, true));
+				filesCount++;
+				AIONode firstChild = new AIONode(new AIOInfo(GenerateFileID(), fileInfo[0].Name, true));
 				if (curChild == null) //Khong co thu muc con, chi co file
 				{
 					subRoot.childNode = firstChild;					
@@ -209,8 +248,11 @@ namespace AIOCommon
 				//Check xem file na`o thoa, bat dau tu firstChild
 				for (int i = 0;i<fileInfo.Length;i++)
 				{						
-					if (i < fileInfo.Length - 1)
-						next = new AIONode(new AIOInfo(GenerateID(), fileInfo[i+1].Name, true));
+					if (i < fileInfo.Length - 1) 
+					{
+						filesCount++;
+						next = new AIONode(new AIOInfo(GenerateFileID(), fileInfo[i+1].Name, true));
+					}
 					else
 						next = null;
 					curChild.nextNode = next;
@@ -240,32 +282,33 @@ namespace AIOCommon
 			if (di.Exists) 
 			{
 				totalCount = 1;
+				foldersCount = 1;
+				filesCount = 0;
 				//root = new AIONode(di, false);
-				root = new AIONode(new AIOInfo(GenerateID(), di.Name, false));
+				root = new AIONode(new AIOInfo(GenerateFolderID(), di.Name, false));
 				
-				FlatSynchronize_R(di, root, pattern, bRecursive);				
+				AIONode previousNode = new AIONode();
+
+				FlatSynchronize_R(di, ref previousNode , pattern, bRecursive);				
 			}			
 
 			//End process
 			isProcessing = false;
 		}
 
-
-		public void FlatSynchronize_R(DirectoryInfo di, AIONode previousNode, string pattern, bool bRecursive) 
+		//AIONode previousNode = null;
+		public void FlatSynchronize_R(DirectoryInfo di, ref AIONode previousNode, string pattern, bool bRecursive) 
 		{
 			//DirectoryInfo di = (DirectoryInfo)subRoot.info;
 			DirectoryInfo [] subDi = di.GetDirectories();						
 			if (subDi.Length > 0) //Co thu muc con
 			{
-				foldersCount += subDi.Length;
-				totalCount += subDi.Length;				
-
 				if (bRecursive) 
 				{
 					for (int i = 0;i<subDi.Length;i++)
 					{
 						//Recursive
-						FlatSynchronize_R(subDi[i], previousNode, pattern, bRecursive);						
+						FlatSynchronize_R(subDi[i], ref previousNode, pattern, bRecursive);						
 					}
 					//Sau vong lap nay, curChild se tro toi node thu muc cuoi cung
 					//Neu doi curChild (2 dong cuoi) ra ngoai, curChild se tro ve null
@@ -277,13 +320,13 @@ namespace AIOCommon
 			FileInfo [] fileInfo = di.GetFiles(pattern);
 			if (fileInfo.Length > 0) 
 			{
-				filesCount += fileInfo.Length;
 				totalCount += fileInfo.Length;
 				AIOProgress.progressValue = filesCount / 100;
 				Thread.Sleep(1);
 				//FirstNode
-				AIONode firstChild = new AIONode(new AIOInfo(GenerateID(), fileInfo[0].Name, true));
-				if (previousNode.Equals(root)) //Khong co thu muc con, chi co file
+				filesCount++;
+				AIONode firstChild = new AIONode(new AIOInfo(GenerateFileID(), fileInfo[0].Name, true));
+				if (root.childNode == null) //Khong co thu muc con, chi co file
 				{
 					root.childNode = firstChild;
 					firstChild.prevNode = root;
@@ -301,8 +344,9 @@ namespace AIOCommon
 				//Check xem file na`o thoa, bat dau tu firstChild
 				AIONode curChild = null;
 				for (int i = 1;i<fileInfo.Length;i++)
-				{						
-					curChild = new AIONode(new AIOInfo(GenerateID(), fileInfo[i+1].Name, true));
+				{				
+					filesCount++;
+					curChild = new AIONode(new AIOInfo(GenerateFileID(), fileInfo[i].Name, true));
 					
 					previousNode.nextNode = curChild;
 					curChild.prevNode = previousNode;
@@ -340,9 +384,10 @@ namespace AIOCommon
 
 		//CreateTreeNode
 		public void CopyNodeInfo(TreeNode treenode, AIONode aionode) {
-			if (aionode.data != null)
+			//if (aionode.data != null)
 				treenode.Text = aionode.data.Name;
-			else treenode.Text = "*_*";
+				//treenode.Text = aionode.data.ID;
+			//else treenode.Text = "*_*";
 			treenode.Tag = aionode;			
 		}
 		//Fill tree into TreeView
@@ -453,7 +498,16 @@ namespace AIOCommon
 				//AIONode newNode = new AIONode(nodeToCopy.info, nodeToCopy.isFile);
 				//newNode.childNode = nodeToCopy.childNode;
 				AIONode newNode = new AIONode();
-				newNode.Clone(nodeToCopy);
+				if (nodeToCopy.data.isFile) 
+				{
+					filesCount++;
+					newNode.Clone(nodeToCopy, GenerateFileID());
+				}
+				else 
+				{
+					foldersCount++;
+					newNode.Clone(nodeToCopy, GenerateFolderID());
+				}
 
 				AIONode newChild = new AIONode();
 
@@ -487,7 +541,15 @@ namespace AIOCommon
 		{
 			if (src == null) return;
 			//Copy 			
-			dest.Clone(src);
+			if (src.data.isFile) {
+				filesCount++;
+				dest.Clone(src, GenerateFileID());
+			}
+			else 
+			{
+				foldersCount++;
+				dest.Clone(src, GenerateFolderID());
+			}
 			//Copy child
 			if (src.childNode != null) 
 			{
@@ -508,10 +570,18 @@ namespace AIOCommon
 			}
 		}
 
+		private bool deleteNode = false;
 		public void DeleteNode(AIONode nodeToDelete) 
 		{
-			AIONode previousNode = nodeToDelete.prevNode;			
+			deleteNode = true;
+			int [] minus = Count(nodeToDelete);
+			deleteNode = false;
+			
+			foldersCount -= minus[0];
+			filesCount -= minus[1];
 
+			AIONode previousNode = nodeToDelete.prevNode;			
+            
 			if (previousNode != null) //Not to delete the root
 			{	
 				bool previousIsParent = nodeToDelete.prevIsParent;
@@ -584,6 +654,61 @@ namespace AIOCommon
 			nodeToInsert.prevNode = nodeToAttach;
 
 			nodeToAttach.childNode = nodeToInsert;			
+		}
+
+		public int[] Count(AIONode subroot) 
+		{
+			int [] fCount = {0, 0};
+			//f[0] //Folder
+			//f[1] //File
+			if (deleteNode) //Delete node thi can dem luon chinh no'
+				if (subroot.data.isFile) 
+				{
+					fCount[1] = 1;
+				}
+				else 
+				{
+					fCount[0] = 1;
+				}
+
+			//Save ID if delete
+			if (deleteNode) 
+			{
+				if (subroot.data.isFile)
+					queueFileID.Enqueue(subroot.data.ID);
+				else queueFolderID.Enqueue(subroot.data.ID);
+			}
+
+			Count_R(subroot, ref fCount[0], ref fCount[1]);					
+			return fCount;
+		}
+
+		private void Count_R(AIONode subroot, ref int folderCount, ref int fileCount)
+		{
+			//Dem tat ca cac con cua subroot
+			if (subroot == null) return;
+			//Child
+			AIONode current = subroot.childNode;
+
+			while (current != null) 
+			{
+				if (current.data.isFile == false) //Folder
+				{
+					Count_R(current, ref folderCount , ref fileCount);
+					folderCount++;
+					//Save ID
+					if (deleteNode) 
+						queueFolderID.Enqueue(current.data.ID);
+				}
+				else 
+				{
+					fileCount++;
+					if (deleteNode)
+						queueFileID.Enqueue(current.data.ID);
+				}
+	
+				current = current.nextNode;
+			}			
 		}
 
 		private void Swap(AIONode node1, AIONode node2) 
