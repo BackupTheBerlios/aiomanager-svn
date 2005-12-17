@@ -248,7 +248,7 @@ namespace AIOForm
 		}
 
 		public void Synchronize() {
-			tree.Synchronize(txtPath.Text.Trim(), txtPattern.Text.Trim(), true);
+			//tree.Synchronize(txtPath.Text.Trim(), txtPattern.Text.Trim(), true);
 
 			/*					
 			lstDirectory.Items.Clear();			

@@ -7,13 +7,34 @@ namespace AIOCommon
 	/// <summary>
 	/// Summary description for Class1.
 	/// </summary>
-	public class AIOCommon
+	public class AIOCommonInfo
 	{
-		public AIOCommon()
+		//Data
+		public string ID;
+		public int ratings;
+		public int icon;
+		public string comment;
+		public string path;
+		public string createdDate;
+
+		public AIOCommonInfo() {}
+
+		public void SetCommonInfo(AIOCommonInfo info) 
 		{
-		
+			SetCommonInfo(info.ID, info.ratings, info.icon, info.comment, info.path, info.createdDate);
 		}
 
+		public void SetCommonInfo(string ID, int ratings, int icon, string comment, string path, string createdDate)
+		{
+			this.ID = ID;
+			this.ratings = ratings;
+			this.icon = icon;
+			this.comment = comment;
+			this.path = path;
+			this.createdDate = createdDate;
+		}
+
+		/*
 		public void Synchronize() 
 		{
 
@@ -55,6 +76,6 @@ namespace AIOCommon
 			{
 				return null;
 			}
-		}
+		}*/
 	}
 }

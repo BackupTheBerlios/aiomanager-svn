@@ -4,14 +4,15 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
-using AIOCommon;
 using System.IO;
+using AIOCommon;
 
 namespace AIOUserControls
 {
 	/// <summary>
 	/// Summary description for LogicalExplorer.
-	/// </summary>
+	/// </summary>	
+
 	public class LogicalExplorer : System.Windows.Forms.UserControl
 	{
 		private System.Windows.Forms.ListView listView1;
@@ -48,16 +49,28 @@ namespace AIOUserControls
 		//Node to operate - cut - copy - paste
 		private AIONode nodeToOperate;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.ColumnHeader columnHeader2;
+		private System.Windows.Forms.ColumnHeader columnHeader3;
+		private System.Windows.Forms.ColumnHeader columnHeader4;
 
 		//Save sender for cut - copy - paste
 		private object objSender; //Context menu hien len tai control nao, treeview hay listview
 		
+		//Database
+		private AIODatabase aioDb;
+		//ViewDetailsEvent
+		public delegate void ViewDetailsInfoDele(object [] info);
+		public event ViewDetailsInfoDele ViewDetailsInfo;
+
+		//EditFileInfoEvent
+		public delegate void EditFileInfoDele(string ID);
+		public event EditFileInfoDele EditFileInfo;
+
+
 		public LogicalExplorer()
 		{
 			// This call is required by the Windows.Forms Form Designer.
-			InitializeComponent();
-
-			// TODO: Add any initialization after the InitializeComponent call			
+			InitializeComponent();					
 		}
 
 		/// <summary> 
@@ -100,13 +113,19 @@ namespace AIOUserControls
 			this.menuItem7 = new System.Windows.Forms.MenuItem();
 			this.ctxDelete = new System.Windows.Forms.MenuItem();
 			this.label1 = new System.Windows.Forms.Label();
+			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader4 = new System.Windows.Forms.ColumnHeader();
 			this.SuspendLayout();
 			// 
 			// listView1
 			// 
 			this.listView1.AllowDrop = true;
 			this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-																						this.columnHeader1});
+																						this.columnHeader1,
+																						this.columnHeader2,
+																						this.columnHeader3,
+																						this.columnHeader4});
 			this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
 			this.listView1.FullRowSelect = true;
 			this.listView1.GridLines = true;
@@ -131,7 +150,7 @@ namespace AIOUserControls
 			// columnHeader1
 			// 
 			this.columnHeader1.Text = "File Name";
-			this.columnHeader1.Width = 257;
+			this.columnHeader1.Width = 182;
 			// 
 			// imageList1
 			// 
@@ -241,6 +260,21 @@ namespace AIOUserControls
 			this.label1.TabIndex = 12;
 			this.label1.Text = "label1";
 			// 
+			// columnHeader2
+			// 
+			this.columnHeader2.Text = "Ratings";
+			this.columnHeader2.Width = 105;
+			// 
+			// columnHeader3
+			// 
+			this.columnHeader3.Text = "Comment";
+			this.columnHeader3.Width = 104;
+			// 
+			// columnHeader4
+			// 
+			this.columnHeader4.Text = "Path";
+			this.columnHeader4.Width = 100;
+			// 
 			// LogicalExplorer
 			// 
 			this.Controls.Add(this.label1);
@@ -258,9 +292,21 @@ namespace AIOUserControls
 		public void SetTree(AIOFolderTree tree2) 
 		{
 			this.tree = tree2;
+
+			//RegisterEvent
+			tree.UpdateLogicalExplorer += new AIOCommon.AIOFolderTree.UpdateLogicalExplorerDele(tree_UpdateLogicalExplorer);
+
 			tree.FillOneLevelTree(treeView1);
 			treeView1.SelectedNode = treeView1.Nodes[0];
 			UpdateListView();
+		}
+
+		public AIODatabase AioDatabase
+		{
+			set 
+			{
+				aioDb = value;
+			}
 		}
 
 		private void UpdateListView() 
@@ -280,8 +326,20 @@ namespace AIOUserControls
 					name = aionode.data.Name;
 					//name = aionode.data.ID;
 				ListViewItem item = listView1.Items.Add(name, 0);
-
+				//Save tag
 				item.Tag = aionode;
+
+				//View sub items info
+				if (aionode.data.isFile) 
+				{
+					object [] obj = aioDb.GetCommonInfo(aionode.data.ID);
+
+					//View it
+					if (obj != null)
+						for(int i = 0;i<obj.Length;i++)
+							item.SubItems.Add(obj[i].ToString());
+
+				}
 
 				if (aionode.data.isFile)
 					item.ImageIndex = 1;
@@ -312,6 +370,9 @@ namespace AIOUserControls
 			else //IsFile - Execute here-----------------
 			{				
 				//System.Diagnostics.Process.Start(node.info.FullName);
+				string ID = node.data.ID;
+
+				EditFileInfo(ID);
 			}
 		}
 		private void treeView1_AfterSelect(object sender, System.Windows.Forms.TreeViewEventArgs e)
@@ -489,8 +550,11 @@ namespace AIOUserControls
 			}
 		}
 
+		//Update details Info on frmAIOMain
 		private void listView1_SelectedIndexChanged(object sender, System.EventArgs e)
 		{
+			if (listView1.SelectedItems.Count == 0) return;
+			UpdateDetailsInfo();			
 		}
 
 		private void treeView1_BeforeSelect(object sender, System.Windows.Forms.TreeViewCancelEventArgs e)
@@ -736,7 +800,7 @@ namespace AIOUserControls
 			AIONode nodeToAttach = (AIONode)node.Tag;
 			tree.FoldersCount++;
 			AIONode nodeToInsert = new AIONode(new AIOInfo(tree.GenerateFolderID(), "New Category", false));
-			tree.Insert(nodeToInsert, nodeToAttach);
+			tree.InsertCategory(nodeToInsert, nodeToAttach);
 
 			//Tree
 			TreeNode newNode = new TreeNode();
@@ -753,7 +817,7 @@ namespace AIOUserControls
 			newNode.BeginEdit();
 		}
 
-		public void InsertFileIntoSelectedNode(string name) 
+		public void InsertFileIntoSelectedNode(string path) 
 		{
 			TreeNode node = treeView1.SelectedNode;
 			if (node == null) return;
@@ -762,10 +826,16 @@ namespace AIOUserControls
 			AIONode nodeToAttach = (AIONode)node.Tag;
 
 			tree.FilesCount++;
-			AIONode nodeToInsert = new AIONode(new AIOInfo(tree.GenerateFileID(), true));			
 
-			tree.Insert(nodeToInsert, nodeToAttach);
+			string name = AIOUtil.GetNameFromPath(path);
+			AIONode nodeToInsert = new AIONode(new AIOInfo(tree.GenerateFileID(), name, true));
+			
+			tree.InsertFile(nodeToInsert, nodeToAttach, path);
 
+			//Be sure to execute the queue
+			aioDb.ExecuteQueueCommand();
+
+			//Update listview
 			UpdateListView();
 		}
 
@@ -786,7 +856,7 @@ namespace AIOUserControls
 				aionode.data.Name = e.Label;
 
 				TreeNode node = (TreeNode)aionode.container;
-				node.Text = e.Label;
+				node.Text = e.Label;			
 			}
 		}
 
@@ -877,15 +947,22 @@ namespace AIOUserControls
 
 		private void DeleteNode(AIONode nodeToDelete) 
 		{
-			tree.DeleteNode(nodeToDelete);
-
-			if (nodeToDelete.data.isFile == false) 
+			try 
 			{
-				TreeNode toDelete = (TreeNode)nodeToDelete.container;
-				toDelete.Remove();
-			}
+				tree.DeleteNode(nodeToDelete);
 
-			UpdateListView();
+				if (nodeToDelete.data.isFile == false) 
+				{
+					TreeNode toDelete = (TreeNode)nodeToDelete.container;
+					toDelete.Remove();
+				}
+
+				UpdateListView();
+			}
+			catch (Exception e) 
+			{
+				MessageBox.Show(e.Message);
+			}
 		}
 
 		private void CreateContainerNode(AIONode node) 
@@ -894,8 +971,50 @@ namespace AIOUserControls
 			TreeNode parentNode = (TreeNode)parent.container;
 
 			//Expand to create childnodes and container
-			parentNode.Expand();
+			parentNode.Expand();		
 		}
+
+		public AIONode GetCurrentFolder() 
+		{
+			TreeNode treenode = treeView1.SelectedNode;
+			if (treenode == null) return null;
+			AIONode node = (AIONode)treenode.Tag;
+			return node;
+		}
+		
 		//---------------------------------------------------------------
+
+		//Update details information
+		private void UpdateDetailsInfo() 
+		{
+			AIONode node = (AIONode)listView1.SelectedItems[0].Tag;
+			if (node.data.isFile == false) return;
+
+			string path = listView1.SelectedItems[0].SubItems[3].Text;
+			FileInfo file = new FileInfo(path);
+			long size = file.Length;
+			ViewDetailsInfo(new string[] {AIOUtil.ByteToKB_String(size)});
+		}
+
+		//Update tree when synchronize
+		private delegate void InsertNodeDele(TreeNode parent, TreeNode child);
+		private void tree_UpdateLogicalExplorer(AIONode node)
+		{
+			TreeNode treenode = new TreeNode();
+			tree.CopyNodeInfo(treenode, node);
+			//Make container			
+			node.container = treenode;
+			
+			AIONode parent = tree.GetParent(node);
+			TreeNode parentnode = (TreeNode)parent.container;
+			
+			tree.FillOneLevelNode(treenode, node);
+			//Insert to treeView
+			//InsertNode(parentnode, treenode);
+			//Marshall to STA thread
+			treeView1.Invoke(new InsertNodeDele(InsertNode), new object[] {parentnode, treenode});
+		}
+
+		
 	}
 }

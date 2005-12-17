@@ -3,6 +3,8 @@ using System.IO;
 using System.Collections;
 using System.Windows.Forms;
 using System.Threading;
+using System.Data;
+using System.Data.OleDb;
 
 namespace AIOCommon
 {
@@ -44,13 +46,10 @@ namespace AIOCommon
 	}
 	/// <summary>
 	/// Summary description for AIODataStructure.
-	/// </summary>
+	/// </summary>	
 	[Serializable]
 	public class AIOFolderTree
-	{
-		public enum AIOModule {MODULE_BOOK, MODULE_MUSIC, MODULE_MOVIE, MODULE_CDDVD, MODULE_PHOTO};
-		public string [] modulePrefix = {"B", "M", "F", "C", "P"};
-		public string directoryPrefix = "#";
+	{		
 		//module
 		private AIOModule module;
 		public AIOModule Module 
@@ -62,6 +61,29 @@ namespace AIOCommon
 		//Save deleted ID to reuse
 		private Queue queueFileID = new Queue();
 		private Queue queueFolderID = new Queue();
+
+		//Database operation command queue		
+		private AIODatabase aioDb;
+		public AIODatabase AioDatabase
+		{
+			get 
+			{
+				return aioDb;
+			}
+			set 
+			{
+				aioDb = value;
+			}
+		}
+		//Controller
+		private AIOCommonController controller;
+		public AIOCommonController Controller 
+		{
+			set
+			{
+				controller = value;
+			}
+		}
 
 		//root
 		private AIONode root;
@@ -113,6 +135,9 @@ namespace AIOCommon
 			}			
 		}
 
+		//Event
+		public delegate void UpdateLogicalExplorerDele(AIONode node);
+		public event UpdateLogicalExplorerDele UpdateLogicalExplorer;
 		public AIOFolderTree()
 		{
 		}
@@ -127,7 +152,7 @@ namespace AIOCommon
 			int len = id.Length;
 			for(int i = 0;i<6-len;i++)
 				id = "0" + id;
-			id = modulePrefix[(int)module] + id;
+			id = AIOConstant.modulePrefix[(int)module] + id;
 			return id;
 		}
 
@@ -141,11 +166,19 @@ namespace AIOCommon
 			int len = id.Length;
 			for(int i = 0;i<5-len;i++)
 				id = "0" + id;
-			id = directoryPrefix + modulePrefix[(int)module] + id;
+			id = AIOConstant.directoryPrefix + AIOConstant.modulePrefix[(int)module] + id;
 			return id;
 		}
 
-		public void Synchronize(string path, string pattern, bool bRecursive) 
+		public void CreateRoot(string rootname) 
+		{
+			root = new AIONode(new AIOInfo(GenerateFolderID(), rootname, false));
+			totalCount = 1;
+			foldersCount = 1;
+			filesCount = 0;
+		}
+
+		public void Synchronize(string path, string pattern, bool bRecursive, AIONode subroot) 
 		{
 			//Process
 			isProcessing = true;
@@ -153,14 +186,18 @@ namespace AIOCommon
 			DirectoryInfo di = new DirectoryInfo(path);			
 			if (di.Exists) 
 			{
-				totalCount = 1;
-				foldersCount = 1;
-				filesCount = 0;
-				//root = new AIONode(di, false);
-				root = new AIONode(new AIOInfo(GenerateFolderID(), di.Name, false));
-				
-				Synchronize_R(di, root, pattern, bRecursive);				
+				//Create a folder for the path
+				AIONode node = new AIONode(new AIOInfo(GenerateFolderID(), di.Name, false));
+				//Insert node to subroot;
+				InsertCategory(node, subroot);				
+				//Then synch
+				Synchronize_R(di, node, pattern, bRecursive);
+				//Fire update logical explorer event
+				UpdateLogicalExplorer(node);
 			}			
+
+			//ExecuteQueue to insert file information into database
+			aioDb.ExecuteQueueCommand();
 
 			//End process
 			isProcessing = false;
@@ -228,6 +265,9 @@ namespace AIOCommon
 				//FirstNode
 				filesCount++;
 				AIONode firstChild = new AIONode(new AIOInfo(GenerateFileID(), fileInfo[0].Name, true));
+				//QueueCommand
+				QueueNodeInsert(firstChild.data.ID, fileInfo[0].FullName);
+
 				if (curChild == null) //Khong co thu muc con, chi co file
 				{
 					subRoot.childNode = firstChild;					
@@ -252,6 +292,8 @@ namespace AIOCommon
 					{
 						filesCount++;
 						next = new AIONode(new AIOInfo(GenerateFileID(), fileInfo[i+1].Name, true));
+						//QueueCommand
+						QueueNodeInsert(next.data.ID, fileInfo[i+1].FullName);
 					}
 					else
 						next = null;
@@ -268,12 +310,11 @@ namespace AIOCommon
 					preChild = curChild;
 					curChild = curChild.nextNode;
 				}
-			}			
-				
+			}							
 		}
 
 		//Flatten-synchronization
-		public void FlatSynchronize(string path, string pattern, bool bRecursive) 
+		public void FlatSynchronize(string path, string pattern, bool bRecursive, AIONode subroot) 
 		{
 			//Process
 			isProcessing = true;
@@ -281,23 +322,26 @@ namespace AIOCommon
 			DirectoryInfo di = new DirectoryInfo(path);			
 			if (di.Exists) 
 			{
-				totalCount = 1;
-				foldersCount = 1;
-				filesCount = 0;
-				//root = new AIONode(di, false);
-				root = new AIONode(new AIOInfo(GenerateFolderID(), di.Name, false));
-				
+				//Create a folder for the path
+				AIONode node = new AIONode(new AIOInfo(GenerateFolderID(), di.Name, false));
+				//Insert node to subroot;
+				InsertCategory(node, subroot);				
+				//Then synch
 				AIONode previousNode = new AIONode();
-
-				FlatSynchronize_R(di, ref previousNode , pattern, bRecursive);				
+				FlatSynchronize_R(di, node, ref previousNode , pattern, bRecursive);				
+				//Fire update logical explorer event
+				UpdateLogicalExplorer(node);				
 			}			
+
+			//Execute and insert into database
+			aioDb.ExecuteQueueCommand();
 
 			//End process
 			isProcessing = false;
 		}
 
 		//AIONode previousNode = null;
-		public void FlatSynchronize_R(DirectoryInfo di, ref AIONode previousNode, string pattern, bool bRecursive) 
+		public void FlatSynchronize_R(DirectoryInfo di, AIONode subroot, ref AIONode previousNode, string pattern, bool bRecursive) 
 		{
 			//DirectoryInfo di = (DirectoryInfo)subRoot.info;
 			DirectoryInfo [] subDi = di.GetDirectories();						
@@ -308,7 +352,7 @@ namespace AIOCommon
 					for (int i = 0;i<subDi.Length;i++)
 					{
 						//Recursive
-						FlatSynchronize_R(subDi[i], ref previousNode, pattern, bRecursive);						
+						FlatSynchronize_R(subDi[i], subroot, ref previousNode, pattern, bRecursive);						
 					}
 					//Sau vong lap nay, curChild se tro toi node thu muc cuoi cung
 					//Neu doi curChild (2 dong cuoi) ra ngoai, curChild se tro ve null
@@ -326,10 +370,13 @@ namespace AIOCommon
 				//FirstNode
 				filesCount++;
 				AIONode firstChild = new AIONode(new AIOInfo(GenerateFileID(), fileInfo[0].Name, true));
-				if (root.childNode == null) //Khong co thu muc con, chi co file
+				//Database
+				QueueNodeInsert(firstChild.data.ID, fileInfo[0].FullName);
+
+				if (subroot.childNode == null) //Khong co thu muc con, chi co file
 				{
-					root.childNode = firstChild;
-					firstChild.prevNode = root;
+					subroot.childNode = firstChild;
+					firstChild.prevNode = subroot;
 					firstChild.prevIsParent = true;
 				} 
 				else //Co thu muc con
@@ -347,6 +394,8 @@ namespace AIOCommon
 				{				
 					filesCount++;
 					curChild = new AIONode(new AIOInfo(GenerateFileID(), fileInfo[i].Name, true));
+					//Database
+					QueueNodeInsert(curChild.data.ID, fileInfo[i].FullName);
 					
 					previousNode.nextNode = curChild;
 					curChild.prevNode = previousNode;
@@ -502,23 +551,44 @@ namespace AIOCommon
 				{
 					filesCount++;
 					newNode.Clone(nodeToCopy, GenerateFileID());
+
+					//Database					
+					//CopyInfo cho giong nhau giua 2 ID
+					QueueNodeCopy(nodeToCopy.data.ID, newNode.data.ID);
 				}
 				else 
 				{
 					foldersCount++;
 					newNode.Clone(nodeToCopy, GenerateFolderID());
 				}
-
-				AIONode newChild = new AIONode();
-
-				CopyNode_R(newChild, nodeToCopy.childNode);
-
-				newNode.childNode = newChild;
-				if (newChild != null) 
+	
+				if (nodeToCopy.childNode != null) 
 				{
-					newChild.prevNode = newNode;
-					newChild.prevIsParent = true;
-				}
+					AIONode newChild = new AIONode();
+
+					//Copy child
+					CopyNode_R(newChild, nodeToCopy.childNode);	
+
+					newNode.childNode = newChild;
+
+					//Gan lai parant cho newChild
+					//if (newChild != null) 
+					//{
+						newChild.prevNode = newNode;
+						newChild.prevIsParent = true;
+					//}
+
+					if (newChild.data.isFile) 
+					{
+						//Database						
+						//CopyInfo cho giong nhau giua 2 ID
+						QueueNodeCopy(nodeToCopy.childNode.data.ID, newChild.data.ID);
+					}
+				}				
+
+				//----------------Check lai dong nay---------------------
+				
+				
 
 				//Thay doi parent flag
 				if (nodeToAttach.childNode != null) 
@@ -531,6 +601,9 @@ namespace AIOCommon
 				newNode.prevNode = nodeToAttach;
 				newNode.prevIsParent = true;
 				nodeToAttach.childNode = newNode;
+
+				//Execute Database Queue Command
+				aioDb.ExecuteQueueCommand();
 
 				return newNode;
 			}
@@ -558,6 +631,10 @@ namespace AIOCommon
 				dest.childNode = child;
 				child.prevNode = dest;
 				child.prevIsParent = true;
+
+				//Database				
+				//CopyInfo cho giong nhau giua 2 ID
+				QueueNodeCopy(src.childNode.data.ID, child.data.ID);
 			}
 
 			if (src.nextNode != null) 
@@ -567,13 +644,23 @@ namespace AIOCommon
 				dest.nextNode = next;
 				next.prevNode = dest;
 				next.prevIsParent = false;
+
+				//Database				
+				//CopyInfo cho giong nhau giua 2 ID
+				QueueNodeCopy(src.nextNode.data.ID, next.data.ID);
 			}
 		}
 
 		private bool deleteNode = false;
 		public void DeleteNode(AIONode nodeToDelete) 
 		{
-			deleteNode = true;
+			//Check if nodeToDelete is rootNode
+			if (nodeToDelete.Equals(root)) {
+				throw new AIOException(AIOExceptionType.CANNOT_DELETE_ROOT);				
+			}
+
+			deleteNode = true;			
+			//Count
 			int [] minus = Count(nodeToDelete);
 			deleteNode = false;
 			
@@ -603,6 +690,9 @@ namespace AIOCommon
 
 			//Delete
 			nodeToDelete = null;
+
+			//Execute Queue Command
+			aioDb.ExecuteQueueCommand();
 		}
 
 		public bool IsValidMoveCopy(AIONode nodeToMoveCopy, AIONode nodeToAttach) 
@@ -640,7 +730,7 @@ namespace AIOCommon
 			return current.prevNode;
 		}
 
-		public void Insert(AIONode nodeToInsert, AIONode nodeToAttach) 
+		public void InsertCategory(AIONode nodeToInsert, AIONode nodeToAttach) 
 		{
 			nodeToInsert.nextNode = nodeToAttach.childNode;
 
@@ -653,7 +743,26 @@ namespace AIOCommon
 			nodeToInsert.prevIsParent = true;
 			nodeToInsert.prevNode = nodeToAttach;
 
-			nodeToAttach.childNode = nodeToInsert;			
+			nodeToAttach.childNode = nodeToInsert;					
+		}
+
+		public void InsertFile(AIONode nodeToInsert, AIONode nodeToAttach, string path) 
+		{
+			nodeToInsert.nextNode = nodeToAttach.childNode;
+
+			if (nodeToAttach.childNode != null) 
+			{
+				nodeToAttach.childNode.prevNode = nodeToInsert;
+				nodeToAttach.childNode.prevIsParent = false;
+			}
+
+			nodeToInsert.prevIsParent = true;
+			nodeToInsert.prevNode = nodeToAttach;
+
+			nodeToAttach.childNode = nodeToInsert;	
+		
+			//Database
+			QueueNodeInsert(nodeToInsert.data.ID, path);
 		}
 
 		public int[] Count(AIONode subroot) 
@@ -674,8 +783,13 @@ namespace AIOCommon
 			//Save ID if delete
 			if (deleteNode) 
 			{
-				if (subroot.data.isFile)
+				if (subroot.data.isFile) 
+				{
+					//Save ID for later use
 					queueFileID.Enqueue(subroot.data.ID);
+					//Database
+					QueueNodeDelete(subroot.data.ID);
+				}
 				else queueFolderID.Enqueue(subroot.data.ID);
 			}
 
@@ -703,8 +817,13 @@ namespace AIOCommon
 				else 
 				{
 					fileCount++;
-					if (deleteNode)
+					if (deleteNode) 
+					{
+						//Save ID
 						queueFileID.Enqueue(current.data.ID);
+						//Database
+						QueueNodeDelete(current.data.ID);
+					}
 				}
 	
 				current = current.nextNode;
@@ -767,6 +886,44 @@ namespace AIOCommon
 			}
 		}
 
-		
+		//Database operation -----------------------------------
+		public void QueueNodeInsert(string ID, string path) 
+		{/*
+			string createdDate = DateTime.Now.ToShortDateString();
+			//string sql = "INSERT INTO Common VALUES('" + ID + "', 0, '' ,0, '" + path + "', '" + createdDate + "')";
+			string sqlbase = "INSERT INTO Common VALUES(?, ?, ?, ?, ?, ?)";
+			OleDbCommand sqlCmd = aioDb.CreateSqlWithParam(sqlbase, new object[] {ID, 0, "", 0, path, createdDate});
+			//QueueIt
+			QueueDbCommand(sqlCmd);*/
+			controller.InsertQueue(ID, path);
+		}
+
+		public void QueueNodeCopy(string srcID, string destID) 
+		{/*
+			string createdDate = DateTime.Now.ToShortDateString();			
+
+			string sql = "SELECT * FROM Common WHERE ID = '" + srcID + "'";
+			DataTable table = aioDb.ExecuteSelect(sql);
+			object [] obj = table.Rows[0].ItemArray;
+			//Change the ID
+			obj[0] = destID;
+			//Change the date
+			obj[5] = createdDate;
+						
+			string sqlbase = "INSERT INTO Common VALUES(?, ?, ?, ?, ?, ?)";
+			OleDbCommand sqlCmd = aioDb.CreateSqlWithParam(sqlbase, obj);
+			//QueueIt
+			QueueDbCommand(sqlCmd);*/
+			controller.CopyQueue(srcID, destID);
+		}
+
+		public void QueueNodeDelete(string ID) 
+		{/*
+			string sql = "DELETE FROM Common WHERE ID = '" + ID + "'";
+			OleDbCommand sqlCmd = new OleDbCommand(sql);
+			//QueueIt
+			QueueDbCommand(sqlCmd);*/
+			controller.DeleteQueue(ID);
+		}
 	}
 }

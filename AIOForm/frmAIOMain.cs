@@ -78,10 +78,20 @@ namespace AIOForm
 		private System.Windows.Forms.Button button1;
 		private System.ComponentModel.IContainer components;
 		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.Label lblDebug;
 
 		//Tree
 		private AIOFolderTree tree;
+		//Database
+		private AIODatabase aioDb;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Label lblSize;
+
+		//Current Module
+		private AIOModule curModule = AIOModule.MODULE_BOOK;
+
+		//Controller
+		private AIOCommonController controller;
+
 		public frmAIOMain()
 		{
 			//
@@ -92,7 +102,24 @@ namespace AIOForm
 			//
 			// TODO: Add any constructor code after InitializeComponent call
 			//
-			tree = new AIOFolderTree();			
+			tree = new AIOFolderTree();		
+
+			aioDb = new AIODatabase();
+			aioDb.ConnectToDB(DatabaseType.Access, "AIOManager.mdb");
+
+			//Choose a controller
+			switch (curModule) 
+			{
+				case AIOModule.MODULE_BOOK:
+					controller = new AIOBookController(aioDb);
+					break;
+			}
+
+			tree.CreateRoot(AIOConstant.GetModuleName(curModule));
+			tree.AioDatabase = aioDb;
+			tree.Controller = controller;
+			logicalExplorer1.SetTree(tree);
+			logicalExplorer1.AioDatabase = aioDb;
 		}
 
 		/// <summary>
@@ -106,6 +133,8 @@ namespace AIOForm
 				{
 					components.Dispose();
 				}
+				//Cleanup
+				aioDb.DisconnectDB();
 			}
 			base.Dispose( disposing );
 		}
@@ -182,7 +211,8 @@ namespace AIOForm
 			this.progressBar1 = new System.Windows.Forms.ProgressBar();
 			this.panelContent = new System.Windows.Forms.Panel();
 			this.logicalExplorer1 = new AIOUserControls.LogicalExplorer();
-			this.lblDebug = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
+			this.lblSize = new System.Windows.Forms.Label();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).BeginInit();
@@ -546,7 +576,8 @@ namespace AIOForm
 			// 
 			// tabPage1
 			// 
-			this.tabPage1.Controls.Add(this.lblDebug);
+			this.tabPage1.Controls.Add(this.lblSize);
+			this.tabPage1.Controls.Add(this.label1);
 			this.tabPage1.Controls.Add(this.button2);
 			this.tabPage1.Controls.Add(this.button1);
 			this.tabPage1.Location = new System.Drawing.Point(4, 25);
@@ -557,18 +588,18 @@ namespace AIOForm
 			// 
 			// button2
 			// 
-			this.button2.Location = new System.Drawing.Point(184, 16);
+			this.button2.Location = new System.Drawing.Point(536, 8);
 			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(120, 56);
+			this.button2.Size = new System.Drawing.Size(56, 56);
 			this.button2.TabIndex = 1;
 			this.button2.Text = "button2";
 			this.button2.Click += new System.EventHandler(this.button2_Click);
 			// 
 			// button1
 			// 
-			this.button1.Location = new System.Drawing.Point(56, 8);
+			this.button1.Location = new System.Drawing.Point(480, 8);
 			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(120, 64);
+			this.button1.Size = new System.Drawing.Size(48, 64);
 			this.button1.TabIndex = 0;
 			this.button1.Text = "button1";
 			this.button1.Click += new System.EventHandler(this.button1_Click);
@@ -633,13 +664,20 @@ namespace AIOForm
 			this.logicalExplorer1.Size = new System.Drawing.Size(608, 245);
 			this.logicalExplorer1.TabIndex = 0;
 			// 
-			// lblDebug
+			// label1
 			// 
-			this.lblDebug.Location = new System.Drawing.Point(312, 8);
-			this.lblDebug.Name = "lblDebug";
-			this.lblDebug.Size = new System.Drawing.Size(280, 64);
-			this.lblDebug.TabIndex = 2;
-			this.lblDebug.Text = "label1";
+			this.label1.Location = new System.Drawing.Point(8, 8);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(40, 24);
+			this.label1.TabIndex = 2;
+			this.label1.Text = "Size";
+			// 
+			// lblSize
+			// 
+			this.lblSize.Location = new System.Drawing.Point(48, 8);
+			this.lblSize.Name = "lblSize";
+			this.lblSize.Size = new System.Drawing.Size(88, 24);
+			this.lblSize.TabIndex = 3;
 			// 
 			// frmAIOMain
 			// 
@@ -689,16 +727,26 @@ namespace AIOForm
 			DialogResult result = fileDlg.ShowDialog();
 			if (result.Equals(DialogResult.OK)) 
 			{
-				string filename = fileDlg.FileName;
-				logicalExplorer1.InsertFileIntoSelectedNode(filename);
+				if (fileDlg.CheckFileExists) 
+				{
+					string filename = fileDlg.FileName;
+					logicalExplorer1.InsertFileIntoSelectedNode(filename);
+				}
+				else 
+				{
+					MessageBox.Show("File not exists!");
+				}
 			}
 		}
 
 		public void Synchronize() 
-		{
-			frmSynchronizeWizard synch = new frmSynchronizeWizard(tree);
+		{			
+			//GetSubroot
+			AIONode subroot = logicalExplorer1.GetCurrentFolder();
+
+			frmSynchronizeWizard synch = new frmSynchronizeWizard(tree, subroot);
 			synch.ShowDialog();
-			logicalExplorer1.SetTree(tree);			
+			//logicalExplorer1.SetTree(tree);	
 		}
 
 		public void Search() 
@@ -857,7 +905,11 @@ namespace AIOForm
 		{
 			try
 			{
+				//Clear all old database
+				aioDb.ClearAll(curModule);
 				//LoadTree();	
+				logicalExplorer1.ViewDetailsInfo += new AIOUserControls.LogicalExplorer.ViewDetailsInfoDele(AIOConstant_ViewDetailsInfo);
+				logicalExplorer1.EditFileInfo += new AIOUserControls.LogicalExplorer.EditFileInfoDele(logicalExplorer1_EditFileInfo);
 			}
 			catch (Exception ee) {}
 		}
@@ -865,6 +917,26 @@ namespace AIOForm
 		private void frmAIOMain_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			//SaveTree();
+		}
+
+		//ViewDetailsInfo
+		private void AIOConstant_ViewDetailsInfo(object[] info)
+		{
+			//Size
+			lblSize.Text = info[0].ToString() + " KB";
+		}
+
+		//Call subInfo dialog
+		private void logicalExplorer1_EditFileInfo(string ID)
+		{
+			switch (curModule) 
+			{
+				case AIOModule.MODULE_BOOK:
+					frmBookInfo info = new frmBookInfo(aioDb, controller, ID);
+					info.ShowDialog();					
+					break;
+			}
+			
 		}
 	}
 }

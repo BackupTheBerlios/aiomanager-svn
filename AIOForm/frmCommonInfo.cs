@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
+using AIOCommon;
 
 namespace AIOForm
 {
@@ -15,13 +16,13 @@ namespace AIOForm
 		private System.Windows.Forms.Label label1;
 		private AIOUserControls.RatingField ratingField1;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.TextBox textBox1;
 		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.TextBox textBox2;
-		private System.Windows.Forms.Button button1;
 		private System.Windows.Forms.Panel panel1;
+		private System.Windows.Forms.TextBox txtComment;
+		private System.Windows.Forms.Label lblCreatedDate;
+		private System.Windows.Forms.TextBox txtPath;
+		private System.Windows.Forms.Button btnChangePath;
 		/// <summary> 
 		/// Required designer variable.
 		/// </summary>
@@ -61,13 +62,14 @@ namespace AIOForm
 			this.label1 = new System.Windows.Forms.Label();
 			this.ratingField1 = new AIOUserControls.RatingField();
 			this.label2 = new System.Windows.Forms.Label();
-			this.textBox1 = new System.Windows.Forms.TextBox();
+			this.txtComment = new System.Windows.Forms.TextBox();
 			this.label3 = new System.Windows.Forms.Label();
-			this.label4 = new System.Windows.Forms.Label();
+			this.lblCreatedDate = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
-			this.textBox2 = new System.Windows.Forms.TextBox();
-			this.button1 = new System.Windows.Forms.Button();
+			this.txtPath = new System.Windows.Forms.TextBox();
+			this.btnChangePath = new System.Windows.Forms.Button();
 			this.panel1 = new System.Windows.Forms.Panel();
+			this.panel1.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -99,16 +101,16 @@ namespace AIOForm
 			this.label2.TabIndex = 2;
 			this.label2.Text = "Comment";
 			// 
-			// textBox1
+			// txtComment
 			// 
-			this.textBox1.BackColor = System.Drawing.Color.Beige;
-			this.textBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.textBox1.Location = new System.Drawing.Point(80, 40);
-			this.textBox1.Multiline = true;
-			this.textBox1.Name = "textBox1";
-			this.textBox1.Size = new System.Drawing.Size(424, 48);
-			this.textBox1.TabIndex = 3;
-			this.textBox1.Text = "";
+			this.txtComment.BackColor = System.Drawing.Color.Beige;
+			this.txtComment.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.txtComment.Location = new System.Drawing.Point(80, 40);
+			this.txtComment.Multiline = true;
+			this.txtComment.Name = "txtComment";
+			this.txtComment.Size = new System.Drawing.Size(424, 48);
+			this.txtComment.TabIndex = 3;
+			this.txtComment.Text = "";
 			// 
 			// label3
 			// 
@@ -119,14 +121,14 @@ namespace AIOForm
 			this.label3.TabIndex = 4;
 			this.label3.Text = "Created Date";
 			// 
-			// label4
+			// lblCreatedDate
 			// 
-			this.label4.BackColor = System.Drawing.Color.White;
-			this.label4.Location = new System.Drawing.Point(80, 104);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(80, 24);
-			this.label4.TabIndex = 5;
-			this.label4.Text = "28/11/2005";
+			this.lblCreatedDate.BackColor = System.Drawing.Color.White;
+			this.lblCreatedDate.Location = new System.Drawing.Point(80, 104);
+			this.lblCreatedDate.Name = "lblCreatedDate";
+			this.lblCreatedDate.Size = new System.Drawing.Size(344, 24);
+			this.lblCreatedDate.TabIndex = 5;
+			this.lblCreatedDate.Text = "28/11/2005";
 			// 
 			// label5
 			// 
@@ -137,29 +139,31 @@ namespace AIOForm
 			this.label5.TabIndex = 6;
 			this.label5.Text = "Path";
 			// 
-			// textBox2
+			// txtPath
 			// 
-			this.textBox2.BackColor = System.Drawing.Color.White;
-			this.textBox2.Location = new System.Drawing.Point(80, 128);
-			this.textBox2.Name = "textBox2";
-			this.textBox2.Size = new System.Drawing.Size(344, 23);
-			this.textBox2.TabIndex = 7;
-			this.textBox2.Text = "";
+			this.txtPath.Location = new System.Drawing.Point(80, 128);
+			this.txtPath.MaxLength = 255;
+			this.txtPath.Name = "txtPath";
+			this.txtPath.Size = new System.Drawing.Size(344, 23);
+			this.txtPath.TabIndex = 9;
+			this.txtPath.Text = "";
 			// 
-			// button1
+			// btnChangePath
 			// 
-			this.button1.BackColor = System.Drawing.Color.White;
-			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button1.Location = new System.Drawing.Point(432, 128);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(72, 24);
-			this.button1.TabIndex = 8;
-			this.button1.Text = "Change";
+			this.btnChangePath.BackColor = System.Drawing.Color.White;
+			this.btnChangePath.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnChangePath.Location = new System.Drawing.Point(432, 128);
+			this.btnChangePath.Name = "btnChangePath";
+			this.btnChangePath.Size = new System.Drawing.Size(72, 24);
+			this.btnChangePath.TabIndex = 8;
+			this.btnChangePath.Text = "Change";
+			this.btnChangePath.Click += new System.EventHandler(this.btnChangePath_Click);
 			// 
 			// panel1
 			// 
 			this.panel1.BackColor = System.Drawing.Color.White;
 			this.panel1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.panel1.Controls.Add(this.txtPath);
 			this.panel1.Location = new System.Drawing.Point(0, 0);
 			this.panel1.Name = "panel1";
 			this.panel1.Size = new System.Drawing.Size(512, 160);
@@ -167,12 +171,11 @@ namespace AIOForm
 			// 
 			// frmCommonInfo
 			// 
-			this.Controls.Add(this.button1);
-			this.Controls.Add(this.textBox2);
+			this.Controls.Add(this.btnChangePath);
 			this.Controls.Add(this.label5);
-			this.Controls.Add(this.label4);
+			this.Controls.Add(this.lblCreatedDate);
 			this.Controls.Add(this.label3);
-			this.Controls.Add(this.textBox1);
+			this.Controls.Add(this.txtComment);
 			this.Controls.Add(this.label2);
 			this.Controls.Add(this.ratingField1);
 			this.Controls.Add(this.label1);
@@ -180,9 +183,53 @@ namespace AIOForm
 			this.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
 			this.Name = "frmCommonInfo";
 			this.Size = new System.Drawing.Size(512, 160);
+			this.panel1.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
 		#endregion
+
+		public void LoadDetails(AIOCommonInfo info) 
+		{
+			this.ratingField1.Ratings = info.ratings;
+			this.txtComment.Text = info.comment;
+			this.lblCreatedDate.Text = info.createdDate;
+			this.txtPath.Text = info.path;
+		}
+
+		//Get all
+		public AIOCommonInfo GetCommonInfo() 
+		{
+			AIOCommonInfo info = new AIOCommonInfo();
+			info.ratings = this.ratingField1.Ratings;
+			info.comment = txtComment.Text.Trim();
+			info.createdDate = lblCreatedDate.Text;
+			info.path = txtPath.Text.Trim();
+
+			return info;
+		}
+
+		public void GetCommonInfo2(AIOCommonInfo info) 
+		{
+			info.ratings = this.ratingField1.Ratings;
+			info.comment = txtComment.Text.Trim();
+			info.createdDate = lblCreatedDate.Text;
+			info.path = txtPath.Text.Trim();
+		}
+
+		public void Clear() 
+		{
+			this.ratingField1.Ratings = 0;
+			txtComment.Text = "";			
+		}
+
+		private void btnChangePath_Click(object sender, System.EventArgs e)
+		{
+			//Choose another path
+			OpenFileDialog file = new OpenFileDialog();
+			DialogResult res = file.ShowDialog();
+			if (res.Equals(DialogResult.OK))
+				txtPath.Text = file.FileName;
+		}
 	}
 }

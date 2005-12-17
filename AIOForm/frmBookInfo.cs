@@ -3,6 +3,9 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Data;
+using System.Text;
+using AIOCommon;
 
 namespace AIOForm
 {
@@ -12,41 +15,56 @@ namespace AIOForm
 	public class frmBookInfo : System.Windows.Forms.Form
 	{
 		private System.Windows.Forms.Label label1;
-		private System.Windows.Forms.ComboBox comboBox1;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.ComboBox comboBox2;
-		private System.Windows.Forms.Button button1;
-		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.ComboBox comboBox3;
 		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Button button3;
-		private System.Windows.Forms.ComboBox comboBox4;
 		private System.Windows.Forms.Label label4;
 		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.NumericUpDown numericUpDown1;
 		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.PictureBox pictureBox1;
 		private System.Windows.Forms.Button button4;
-		private AIOForm.frmCommonInfo frmCommonInfo1;
-		private System.Windows.Forms.Button button5;
-		private System.Windows.Forms.Button button6;
-		private System.Windows.Forms.Button button7;
-		private System.Windows.Forms.Button button8;
+		private System.Windows.Forms.Button btnEditGenre;
+		private System.Windows.Forms.Button btnEditPublisher;
+		private System.Windows.Forms.Button btnEditAuthor;
+		private System.Windows.Forms.ComboBox cboTitle;
+		private System.Windows.Forms.ComboBox cboGenre;
+		private System.Windows.Forms.ComboBox cboPublisher;
+		private System.Windows.Forms.ComboBox cboAuthor;
+		private System.Windows.Forms.NumericUpDown udYear;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
-		public frmBookInfo()
+		//Database
+		private AIODatabase aioDb;
+		//Tables
+		private DataTable tableAuthor;
+		private DataTable tableGenre;
+		private System.Windows.Forms.Button btnClose;
+		private DataTable tablePublisher;
+
+		//data
+        private AIOBook book;
+		private AIOForm.frmCommonInfo commonInfo;
+		private System.Windows.Forms.Button btnUpdate;
+		private System.Windows.Forms.PictureBox picCover;
+		private System.Windows.Forms.Button btnClear;
+		private System.Windows.Forms.Label lblUpdate;		
+		//Controller;
+		private AIOBookController controller;
+		
+		public frmBookInfo(AIODatabase aioDb, AIOCommonController controller, string ID)
 		{
 			//
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
 
-			//
-			// TODO: Add any constructor code after InitializeComponent call
-			//
+			this.aioDb = aioDb;
+			this.controller = (AIOBookController)controller;
+			this.book = (AIOBook)this.controller.Select(ID);
+
+			//Init for udYear
+			udYear.Maximum = DateTime.Now.Year;
 		}
 
 		/// <summary>
@@ -72,27 +90,27 @@ namespace AIOForm
 		private void InitializeComponent()
 		{
 			this.label1 = new System.Windows.Forms.Label();
-			this.comboBox1 = new System.Windows.Forms.ComboBox();
+			this.cboTitle = new System.Windows.Forms.ComboBox();
 			this.label2 = new System.Windows.Forms.Label();
-			this.comboBox2 = new System.Windows.Forms.ComboBox();
-			this.button1 = new System.Windows.Forms.Button();
-			this.button2 = new System.Windows.Forms.Button();
-			this.comboBox3 = new System.Windows.Forms.ComboBox();
+			this.cboGenre = new System.Windows.Forms.ComboBox();
+			this.btnEditGenre = new System.Windows.Forms.Button();
+			this.btnEditPublisher = new System.Windows.Forms.Button();
+			this.cboPublisher = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
-			this.button3 = new System.Windows.Forms.Button();
-			this.comboBox4 = new System.Windows.Forms.ComboBox();
+			this.btnEditAuthor = new System.Windows.Forms.Button();
+			this.cboAuthor = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
 			this.label5 = new System.Windows.Forms.Label();
-			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+			this.udYear = new System.Windows.Forms.NumericUpDown();
 			this.label6 = new System.Windows.Forms.Label();
-			this.pictureBox1 = new System.Windows.Forms.PictureBox();
+			this.picCover = new System.Windows.Forms.PictureBox();
 			this.button4 = new System.Windows.Forms.Button();
-			this.frmCommonInfo1 = new AIOForm.frmCommonInfo();
-			this.button5 = new System.Windows.Forms.Button();
-			this.button6 = new System.Windows.Forms.Button();
-			this.button7 = new System.Windows.Forms.Button();
-			this.button8 = new System.Windows.Forms.Button();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+			this.btnUpdate = new System.Windows.Forms.Button();
+			this.btnClear = new System.Windows.Forms.Button();
+			this.btnClose = new System.Windows.Forms.Button();
+			this.commonInfo = new AIOForm.frmCommonInfo();
+			this.lblUpdate = new System.Windows.Forms.Label();
+			((System.ComponentModel.ISupportInitialize)(this.udYear)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// label1
@@ -103,12 +121,13 @@ namespace AIOForm
 			this.label1.TabIndex = 1;
 			this.label1.Text = "Title";
 			// 
-			// comboBox1
+			// cboTitle
 			// 
-			this.comboBox1.Location = new System.Drawing.Point(64, 8);
-			this.comboBox1.Name = "comboBox1";
-			this.comboBox1.Size = new System.Drawing.Size(456, 24);
-			this.comboBox1.TabIndex = 2;
+			this.cboTitle.Location = new System.Drawing.Point(64, 8);
+			this.cboTitle.MaxLength = 255;
+			this.cboTitle.Name = "cboTitle";
+			this.cboTitle.Size = new System.Drawing.Size(456, 24);
+			this.cboTitle.TabIndex = 2;
 			// 
 			// label2
 			// 
@@ -118,37 +137,41 @@ namespace AIOForm
 			this.label2.TabIndex = 3;
 			this.label2.Text = "Genre";
 			// 
-			// comboBox2
+			// cboGenre
 			// 
-			this.comboBox2.Location = new System.Drawing.Point(64, 72);
-			this.comboBox2.Name = "comboBox2";
-			this.comboBox2.Size = new System.Drawing.Size(120, 24);
-			this.comboBox2.TabIndex = 4;
+			this.cboGenre.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cboGenre.Location = new System.Drawing.Point(64, 72);
+			this.cboGenre.Name = "cboGenre";
+			this.cboGenre.Size = new System.Drawing.Size(120, 24);
+			this.cboGenre.TabIndex = 4;
 			// 
-			// button1
+			// btnEditGenre
 			// 
-			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button1.Location = new System.Drawing.Point(192, 72);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(56, 24);
-			this.button1.TabIndex = 5;
-			this.button1.Text = "Edit";
+			this.btnEditGenre.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnEditGenre.Location = new System.Drawing.Point(192, 72);
+			this.btnEditGenre.Name = "btnEditGenre";
+			this.btnEditGenre.Size = new System.Drawing.Size(56, 24);
+			this.btnEditGenre.TabIndex = 5;
+			this.btnEditGenre.Text = "Edit";
+			this.btnEditGenre.Click += new System.EventHandler(this.btnEditGenre_Click);
 			// 
-			// button2
+			// btnEditPublisher
 			// 
-			this.button2.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button2.Location = new System.Drawing.Point(192, 104);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(56, 24);
-			this.button2.TabIndex = 8;
-			this.button2.Text = "Edit";
+			this.btnEditPublisher.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnEditPublisher.Location = new System.Drawing.Point(192, 104);
+			this.btnEditPublisher.Name = "btnEditPublisher";
+			this.btnEditPublisher.Size = new System.Drawing.Size(56, 24);
+			this.btnEditPublisher.TabIndex = 8;
+			this.btnEditPublisher.Text = "Edit";
+			this.btnEditPublisher.Click += new System.EventHandler(this.btnEditPublisher_Click);
 			// 
-			// comboBox3
+			// cboPublisher
 			// 
-			this.comboBox3.Location = new System.Drawing.Point(64, 104);
-			this.comboBox3.Name = "comboBox3";
-			this.comboBox3.Size = new System.Drawing.Size(120, 24);
-			this.comboBox3.TabIndex = 7;
+			this.cboPublisher.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cboPublisher.Location = new System.Drawing.Point(64, 104);
+			this.cboPublisher.Name = "cboPublisher";
+			this.cboPublisher.Size = new System.Drawing.Size(120, 24);
+			this.cboPublisher.TabIndex = 7;
 			// 
 			// label3
 			// 
@@ -158,21 +181,23 @@ namespace AIOForm
 			this.label3.TabIndex = 6;
 			this.label3.Text = "Publisher";
 			// 
-			// button3
+			// btnEditAuthor
 			// 
-			this.button3.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button3.Location = new System.Drawing.Point(464, 40);
-			this.button3.Name = "button3";
-			this.button3.Size = new System.Drawing.Size(56, 24);
-			this.button3.TabIndex = 11;
-			this.button3.Text = "Edit";
+			this.btnEditAuthor.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnEditAuthor.Location = new System.Drawing.Point(464, 40);
+			this.btnEditAuthor.Name = "btnEditAuthor";
+			this.btnEditAuthor.Size = new System.Drawing.Size(56, 24);
+			this.btnEditAuthor.TabIndex = 11;
+			this.btnEditAuthor.Text = "Edit";
+			this.btnEditAuthor.Click += new System.EventHandler(this.btnEditAuthor_Click);
 			// 
-			// comboBox4
+			// cboAuthor
 			// 
-			this.comboBox4.Location = new System.Drawing.Point(64, 40);
-			this.comboBox4.Name = "comboBox4";
-			this.comboBox4.Size = new System.Drawing.Size(392, 24);
-			this.comboBox4.TabIndex = 10;
+			this.cboAuthor.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+			this.cboAuthor.Location = new System.Drawing.Point(64, 40);
+			this.cboAuthor.Name = "cboAuthor";
+			this.cboAuthor.Size = new System.Drawing.Size(392, 24);
+			this.cboAuthor.TabIndex = 10;
 			// 
 			// label4
 			// 
@@ -190,26 +215,26 @@ namespace AIOForm
 			this.label5.TabIndex = 12;
 			this.label5.Text = "Year";
 			// 
-			// numericUpDown1
+			// udYear
 			// 
-			this.numericUpDown1.Location = new System.Drawing.Point(64, 136);
-			this.numericUpDown1.Maximum = new System.Decimal(new int[] {
-																		   2999,
-																		   0,
-																		   0,
-																		   0});
-			this.numericUpDown1.Minimum = new System.Decimal(new int[] {
-																		   1900,
-																		   0,
-																		   0,
-																		   0});
-			this.numericUpDown1.Name = "numericUpDown1";
-			this.numericUpDown1.TabIndex = 13;
-			this.numericUpDown1.Value = new System.Decimal(new int[] {
-																		 2005,
-																		 0,
-																		 0,
-																		 0});
+			this.udYear.Location = new System.Drawing.Point(64, 136);
+			this.udYear.Maximum = new System.Decimal(new int[] {
+																   2999,
+																   0,
+																   0,
+																   0});
+			this.udYear.Minimum = new System.Decimal(new int[] {
+																   1900,
+																   0,
+																   0,
+																   0});
+			this.udYear.Name = "udYear";
+			this.udYear.TabIndex = 13;
+			this.udYear.Value = new System.Decimal(new int[] {
+																 2005,
+																 0,
+																 0,
+																 0});
 			// 
 			// label6
 			// 
@@ -219,14 +244,14 @@ namespace AIOForm
 			this.label6.TabIndex = 14;
 			this.label6.Text = "Cover";
 			// 
-			// pictureBox1
+			// picCover
 			// 
-			this.pictureBox1.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.pictureBox1.Location = new System.Drawing.Point(392, 72);
-			this.pictureBox1.Name = "pictureBox1";
-			this.pictureBox1.Size = new System.Drawing.Size(128, 152);
-			this.pictureBox1.TabIndex = 15;
-			this.pictureBox1.TabStop = false;
+			this.picCover.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+			this.picCover.Location = new System.Drawing.Point(392, 72);
+			this.picCover.Name = "picCover";
+			this.picCover.Size = new System.Drawing.Size(128, 152);
+			this.picCover.TabIndex = 15;
+			this.picCover.TabStop = false;
 			// 
 			// button4
 			// 
@@ -237,82 +262,219 @@ namespace AIOForm
 			this.button4.TabIndex = 16;
 			this.button4.Text = "...";
 			// 
-			// frmCommonInfo1
+			// btnUpdate
 			// 
-			this.frmCommonInfo1.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.frmCommonInfo1.Location = new System.Drawing.Point(8, 232);
-			this.frmCommonInfo1.Name = "frmCommonInfo1";
-			this.frmCommonInfo1.Size = new System.Drawing.Size(520, 160);
-			this.frmCommonInfo1.TabIndex = 17;
+			this.btnUpdate.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnUpdate.Location = new System.Drawing.Point(8, 424);
+			this.btnUpdate.Name = "btnUpdate";
+			this.btnUpdate.Size = new System.Drawing.Size(104, 32);
+			this.btnUpdate.TabIndex = 18;
+			this.btnUpdate.Text = "Update";
+			this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
 			// 
-			// button5
+			// btnClear
 			// 
-			this.button5.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button5.Location = new System.Drawing.Point(8, 408);
-			this.button5.Name = "button5";
-			this.button5.Size = new System.Drawing.Size(104, 32);
-			this.button5.TabIndex = 18;
-			this.button5.Text = "Update";
+			this.btnClear.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnClear.Location = new System.Drawing.Point(120, 424);
+			this.btnClear.Name = "btnClear";
+			this.btnClear.Size = new System.Drawing.Size(104, 32);
+			this.btnClear.TabIndex = 19;
+			this.btnClear.Text = "Clear";
+			this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
 			// 
-			// button6
+			// btnClose
 			// 
-			this.button6.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button6.Location = new System.Drawing.Point(120, 408);
-			this.button6.Name = "button6";
-			this.button6.Size = new System.Drawing.Size(104, 32);
-			this.button6.TabIndex = 19;
-			this.button6.Text = "Clear";
+			this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnClose.Location = new System.Drawing.Point(416, 424);
+			this.btnClose.Name = "btnClose";
+			this.btnClose.Size = new System.Drawing.Size(104, 32);
+			this.btnClose.TabIndex = 20;
+			this.btnClose.Text = "Close";
+			this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
 			// 
-			// button7
+			// commonInfo
 			// 
-			this.button7.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button7.Location = new System.Drawing.Point(416, 408);
-			this.button7.Name = "button7";
-			this.button7.Size = new System.Drawing.Size(104, 32);
-			this.button7.TabIndex = 20;
-			this.button7.Text = "Cancel";
+			this.commonInfo.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.commonInfo.Location = new System.Drawing.Point(8, 232);
+			this.commonInfo.Name = "commonInfo";
+			this.commonInfo.Size = new System.Drawing.Size(512, 168);
+			this.commonInfo.TabIndex = 21;
 			// 
-			// button8
+			// lblUpdate
 			// 
-			this.button8.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button8.Location = new System.Drawing.Point(304, 408);
-			this.button8.Name = "button8";
-			this.button8.Size = new System.Drawing.Size(104, 32);
-			this.button8.TabIndex = 21;
-			this.button8.Text = "Apply";
+			this.lblUpdate.ForeColor = System.Drawing.Color.Firebrick;
+			this.lblUpdate.Location = new System.Drawing.Point(232, 400);
+			this.lblUpdate.Name = "lblUpdate";
+			this.lblUpdate.Size = new System.Drawing.Size(296, 24);
+			this.lblUpdate.TabIndex = 22;
+			this.lblUpdate.Text = "Remember to UPDATE before close this window.";
+			this.lblUpdate.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+			this.lblUpdate.Click += new System.EventHandler(this.lblUpdate_Click);
 			// 
 			// frmBookInfo
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
-			this.ClientSize = new System.Drawing.Size(528, 450);
-			this.Controls.Add(this.button8);
-			this.Controls.Add(this.button7);
-			this.Controls.Add(this.button6);
-			this.Controls.Add(this.button5);
-			this.Controls.Add(this.frmCommonInfo1);
+			this.ClientSize = new System.Drawing.Size(528, 460);
+			this.Controls.Add(this.lblUpdate);
+			this.Controls.Add(this.commonInfo);
+			this.Controls.Add(this.btnClose);
+			this.Controls.Add(this.btnClear);
+			this.Controls.Add(this.btnUpdate);
 			this.Controls.Add(this.button4);
-			this.Controls.Add(this.pictureBox1);
+			this.Controls.Add(this.picCover);
 			this.Controls.Add(this.label6);
-			this.Controls.Add(this.numericUpDown1);
+			this.Controls.Add(this.udYear);
 			this.Controls.Add(this.label5);
-			this.Controls.Add(this.button3);
-			this.Controls.Add(this.comboBox4);
+			this.Controls.Add(this.btnEditAuthor);
+			this.Controls.Add(this.cboAuthor);
 			this.Controls.Add(this.label4);
-			this.Controls.Add(this.button2);
-			this.Controls.Add(this.comboBox3);
+			this.Controls.Add(this.btnEditPublisher);
+			this.Controls.Add(this.cboPublisher);
 			this.Controls.Add(this.label3);
-			this.Controls.Add(this.button1);
-			this.Controls.Add(this.comboBox2);
+			this.Controls.Add(this.btnEditGenre);
+			this.Controls.Add(this.cboGenre);
 			this.Controls.Add(this.label2);
-			this.Controls.Add(this.comboBox1);
+			this.Controls.Add(this.cboTitle);
 			this.Controls.Add(this.label1);
 			this.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
+			this.MaximizeBox = false;
+			this.MinimizeBox = false;
 			this.Name = "frmBookInfo";
+			this.ShowInTaskbar = false;
+			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
 			this.Text = "Update Book Information";
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+			this.Load += new System.EventHandler(this.frmBookInfo_Load);
+			((System.ComponentModel.ISupportInitialize)(this.udYear)).EndInit();
 			this.ResumeLayout(false);
 
 		}
 		#endregion
+
+		private void LoadData() 
+		{
+			cboAuthor.DisplayMember = AIOConstant.GetColumnName(AIOSubInfoType.BOOK_AUTHOR);
+			cboAuthor.ValueMember = "ID";
+
+			cboGenre.DisplayMember = AIOConstant.GetColumnName(AIOSubInfoType.BOOK_GENRE);
+			cboGenre.ValueMember = "ID";
+
+			cboPublisher.DisplayMember = AIOConstant.GetColumnName(AIOSubInfoType.BOOK_PUBLISHER);
+			cboPublisher.ValueMember = "ID";
+
+			ReloadAuthor();
+			ReloadGenre();
+			ReloadPublisher();
+		}
+
+		private void ReloadAuthor() 
+		{
+			tableAuthor = aioDb.GetAllName(AIOSubInfoType.BOOK_AUTHOR);			
+			cboAuthor.DataSource = tableAuthor;	
+		}
+
+		private void ReloadGenre() 
+		{
+			tableGenre = aioDb.GetAllName(AIOSubInfoType.BOOK_GENRE);			
+			cboGenre.DataSource = tableGenre;						
+		}
+
+		private void ReloadPublisher() 
+		{
+			tablePublisher = aioDb.GetAllName(AIOSubInfoType.BOOK_PUBLISHER);			
+			cboPublisher.DataSource = tablePublisher;								
+		}
+
+		private void LoadDetails() 
+		{
+			commonInfo.LoadDetails(book);
+
+			cboTitle.Text = book.title;
+
+			if (book.authorID.Equals("") == false)
+				cboAuthor.SelectedValue = book.authorID;
+			if (book.genreID.Equals("") == false)
+				cboGenre.SelectedValue = book.genreID;
+			if (book.publisherID.Equals("") == false)
+				cboPublisher.SelectedValue = book.publisherID;
+
+			if (book.year >= udYear.Minimum && book.year <= udYear.Maximum)
+				udYear.Value = book.year;
+			else udYear.Value = DateTime.Now.Year;
+		}
+
+		//-------------------Event handler------------------------------
+		private void btnEditAuthor_Click(object sender, System.EventArgs e)
+		{
+			frmSubInfo subInfo = new frmSubInfo(AIOSubInfoType.BOOK_AUTHOR, aioDb);
+			subInfo.ShowDialog();
+			ReloadAuthor();
+		}
+
+		private void btnEditGenre_Click(object sender, System.EventArgs e)
+		{
+			frmSubInfo subInfo = new frmSubInfo(AIOSubInfoType.BOOK_GENRE, aioDb);
+			subInfo.ShowDialog();
+			ReloadGenre();
+		}
+
+		private void btnEditPublisher_Click(object sender, System.EventArgs e)
+		{
+			frmSubInfo subInfo = new frmSubInfo(AIOSubInfoType.BOOK_PUBLISHER, aioDb);
+			subInfo.ShowDialog();
+			ReloadPublisher();
+		}
+
+		private void frmBookInfo_Load(object sender, System.EventArgs e)
+		{
+			LoadData();
+			LoadDetails();
+		}
+
+		private void Clear() 
+		{
+			//Clear common info
+			commonInfo.Clear();
+
+			//Clear the boxes
+			cboTitle.Text = "";
+			cboAuthor.SelectedIndex = 0;
+			cboGenre.SelectedIndex = 0;
+			cboPublisher.SelectedIndex = 0;
+			udYear.Value = DateTime.Now.Year;			
+		}
+
+		//Event handler---------------------------------------------
+		private void btnClose_Click(object sender, System.EventArgs e)
+		{
+			this.Close();
+		}
+
+		private void btnUpdate_Click(object sender, System.EventArgs e)
+		{
+			//ID already available
+			//Get common info from the CommonInfo usercontrol
+			commonInfo.GetCommonInfo2(book);
+			//Extends to book info
+			book.title = cboTitle.Text.Trim();
+			book.authorID = cboAuthor.SelectedValue.ToString();
+			book.genreID = cboGenre.SelectedValue.ToString();
+			book.publisherID = cboPublisher.SelectedValue.ToString();
+			book.year = (int)udYear.Value;
+			book.cover = Encoding.UTF8.GetBytes("(No cover)");
+
+			//Update it
+			controller.UpdateInfo(book);			
+		}
+
+		private void btnClear_Click(object sender, System.EventArgs e)
+		{
+			Clear();
+		}
+
+		private void lblUpdate_Click(object sender, System.EventArgs e)
+		{
+		
+		}
 	}
 }

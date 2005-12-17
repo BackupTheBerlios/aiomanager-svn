@@ -279,6 +279,16 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "frmSplash.cs"
+                    SubType = "Form"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "frmSplash.resx"
+                    DependentUpon = "frmSplash.cs"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "frmSubInfo.cs"
                     SubType = "Form"
                     BuildAction = "Compile"

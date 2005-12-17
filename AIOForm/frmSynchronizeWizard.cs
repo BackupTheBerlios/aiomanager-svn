@@ -52,6 +52,7 @@ namespace AIOForm
 		private enum ACTIONS {ACTION_SYNC, ACTION_RESYNC, ACTION_CHECKSYNC};
 		
 		private AIOFolderTree tree;
+		private AIONode subroot;
 		private string path;
 		private string pattern;
 		private System.Windows.Forms.Label label4;
@@ -64,12 +65,13 @@ namespace AIOForm
 		IAsyncResult result;
 
 		//Thread
-		Thread progressThread;
+		private Thread progressThread;
 		private System.Windows.Forms.Label lblPercent;
 		private System.Windows.Forms.CheckBox chkDoNotCreateSubCategory;
-		Thread synchThread;
+		private Thread synchThread;
 
-		public frmSynchronizeWizard(AIOFolderTree tree2)
+		
+		public frmSynchronizeWizard(AIOFolderTree tree2, AIONode subroot)
 		{
 			//
 			// Required for Windows Form Designer support
@@ -80,6 +82,7 @@ namespace AIOForm
 			// TODO: Add any constructor code after InitializeComponent call
 			//
 			this.tree = tree2;
+			this.subroot = subroot;
 		}
 
 		/// <summary>
@@ -585,7 +588,7 @@ namespace AIOForm
 			//Start timer
 			timer.Start();
 
-			tree.Synchronize(path, pattern, bRecursive);													
+			tree.Synchronize(path, pattern, bRecursive, subroot);
 
 			//Stop timer
 			timer.Stop();
@@ -602,7 +605,7 @@ namespace AIOForm
 			//Start timer
 			timer.Start();
 
-			tree.FlatSynchronize(path, pattern, bRecursive);													
+			tree.FlatSynchronize(path, pattern, bRecursive, subroot);													
 
 			//Stop timer
 			timer.Stop();
