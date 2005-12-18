@@ -93,7 +93,9 @@ namespace AIOCommon
 		private int filesCount = 0;
 		private int totalCount = 0;
 
+		//Processing
 		private bool isProcessing = false;
+		public string currentProcessingFile = "";
 
 		public int Size
 		{
@@ -924,6 +926,58 @@ namespace AIOCommon
 			//QueueIt
 			QueueDbCommand(sqlCmd);*/
 			controller.DeleteQueue(ID);
+		}
+
+		//Apply Synchronization------------------------------------------
+		public void ApplySynchronization(AIONode subroot, string folderPath) 
+		{
+			isProcessing = true;
+
+			//Create folder inside the folderPath
+			DirectoryInfo dir = new DirectoryInfo(folderPath);			
+			dir.CreateSubdirectory(subroot.data.Name);
+			
+			string parentPath = folderPath + @"\" + subroot.data.Name;
+			ApplySynchronization_R(subroot.childNode, parentPath);
+
+			isProcessing = false;
+		}
+
+		private void ApplySynchronization_R(AIONode subroot, string parentPath) 
+		{
+			if (subroot == null) return;
+			
+			ApplySynchronization_R(subroot.childNode, parentPath + @"\" + subroot.data.Name);
+
+			//Apply to subroot
+			AIONode current = subroot;
+
+			while (current != null) 
+			{
+				//Apply to folder
+				if (current.data.isFile == false) 
+				{
+					if (current.Equals(subroot) == false)
+						ApplySynchronization(current, parentPath);
+				}
+				else 
+				{
+					//Create folder for current
+					DirectoryInfo dir = new DirectoryInfo(parentPath);
+					if (dir.Exists == false)
+						dir.Create();
+
+					//Get file path
+					AIOCommonInfo info = controller.Select(current.data.ID);
+					currentProcessingFile = info.path;
+
+					//Copy the file to new directory
+					FileInfo file = new FileInfo(info.path);
+					file.CopyTo(parentPath+@"\"+file.Name);
+				}
+				//Next
+				current = current.nextNode;
+			}
 		}
 	}
 }

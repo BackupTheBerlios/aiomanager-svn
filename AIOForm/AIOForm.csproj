@@ -309,12 +309,11 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "Global.cs"
-                    SubType = "Code"
-                    BuildAction = "Compile"
+                    RelPath = "licenses.licx"
+                    BuildAction = "EmbeddedResource"
                 />
                 <File
-                    RelPath = "licenses.licx"
+                    RelPath = "Splash.resources"
                     BuildAction = "EmbeddedResource"
                 />
             </Include>

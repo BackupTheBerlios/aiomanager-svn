@@ -41,11 +41,6 @@ namespace AIOForm
 		private System.Windows.Forms.ComboBox cboPattern;
 		private System.Windows.Forms.Panel panel3;
 		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Panel panel4;
-		private System.Windows.Forms.RadioButton radioButton1;
-		private System.Windows.Forms.RadioButton radioButton2;
-		private System.Windows.Forms.RadioButton radioButton3;
-		private System.Windows.Forms.Label label6;
 		private System.Windows.Forms.ProgressBar progressBar;
 		private System.Windows.Forms.Button btnFinish;
 
@@ -59,6 +54,7 @@ namespace AIOForm
 		private System.Windows.Forms.Label lblElapsed;
 		private bool bRecursive;
 
+		private string applySynchPath;
 		//Timer
 		AccurateTimer timer = new AccurateTimer();
 		//AsyncResult
@@ -68,6 +64,7 @@ namespace AIOForm
 		private Thread progressThread;
 		private System.Windows.Forms.Label lblPercent;
 		private System.Windows.Forms.CheckBox chkDoNotCreateSubCategory;
+		private System.Windows.Forms.Label lblCurrentProcessingFile;
 		private Thread synchThread;
 
 		
@@ -151,16 +148,11 @@ namespace AIOForm
 			this.progressBar = new System.Windows.Forms.ProgressBar();
 			this.label5 = new System.Windows.Forms.Label();
 			this.lblPercent = new System.Windows.Forms.Label();
-			this.panel4 = new System.Windows.Forms.Panel();
-			this.radioButton1 = new System.Windows.Forms.RadioButton();
-			this.radioButton2 = new System.Windows.Forms.RadioButton();
-			this.radioButton3 = new System.Windows.Forms.RadioButton();
-			this.label6 = new System.Windows.Forms.Label();
 			this.btnFinish = new System.Windows.Forms.Button();
+			this.lblCurrentProcessingFile = new System.Windows.Forms.Label();
 			this.panel1.SuspendLayout();
 			this.panel2.SuspendLayout();
 			this.panel3.SuspendLayout();
-			this.panel4.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// panel1
@@ -264,7 +256,7 @@ namespace AIOForm
 			this.panel2.Controls.Add(this.cboFolder);
 			this.panel2.Controls.Add(this.label2);
 			this.panel2.Controls.Add(this.chkDoNotCreateSubCategory);
-			this.panel2.Location = new System.Drawing.Point(128, 24);
+			this.panel2.Location = new System.Drawing.Point(128, 8);
 			this.panel2.Name = "panel2";
 			this.panel2.Size = new System.Drawing.Size(528, 304);
 			this.panel2.TabIndex = 5;
@@ -346,6 +338,7 @@ namespace AIOForm
 			this.panel3.Controls.Add(this.progressBar);
 			this.panel3.Controls.Add(this.label5);
 			this.panel3.Controls.Add(this.lblPercent);
+			this.panel3.Controls.Add(this.lblCurrentProcessingFile);
 			this.panel3.Location = new System.Drawing.Point(128, 8);
 			this.panel3.Name = "panel3";
 			this.panel3.Size = new System.Drawing.Size(528, 304);
@@ -354,7 +347,7 @@ namespace AIOForm
 			// 
 			// lblElapsed
 			// 
-			this.lblElapsed.Location = new System.Drawing.Point(80, 80);
+			this.lblElapsed.Location = new System.Drawing.Point(80, 104);
 			this.lblElapsed.Name = "lblElapsed";
 			this.lblElapsed.Size = new System.Drawing.Size(240, 16);
 			this.lblElapsed.TabIndex = 3;
@@ -362,7 +355,7 @@ namespace AIOForm
 			// 
 			// label4
 			// 
-			this.label4.Location = new System.Drawing.Point(16, 80);
+			this.label4.Location = new System.Drawing.Point(16, 104);
 			this.label4.Name = "label4";
 			this.label4.Size = new System.Drawing.Size(56, 16);
 			this.label4.TabIndex = 2;
@@ -379,7 +372,7 @@ namespace AIOForm
 			// 
 			this.label5.Location = new System.Drawing.Point(16, 16);
 			this.label5.Name = "label5";
-			this.label5.Size = new System.Drawing.Size(232, 24);
+			this.label5.Size = new System.Drawing.Size(88, 24);
 			this.label5.TabIndex = 0;
 			this.label5.Text = "Synchronizing";
 			// 
@@ -392,63 +385,24 @@ namespace AIOForm
 			this.lblPercent.Text = "0%";
 			this.lblPercent.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
 			// 
-			// panel4
-			// 
-			this.panel4.BackColor = System.Drawing.Color.White;
-			this.panel4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.panel4.Controls.Add(this.radioButton1);
-			this.panel4.Controls.Add(this.radioButton2);
-			this.panel4.Controls.Add(this.radioButton3);
-			this.panel4.Controls.Add(this.label6);
-			this.panel4.Location = new System.Drawing.Point(144, 8);
-			this.panel4.Name = "panel4";
-			this.panel4.Size = new System.Drawing.Size(488, 296);
-			this.panel4.TabIndex = 0;
-			// 
-			// radioButton1
-			// 
-			this.radioButton1.Location = new System.Drawing.Point(24, 120);
-			this.radioButton1.Name = "radioButton1";
-			this.radioButton1.Size = new System.Drawing.Size(304, 24);
-			this.radioButton1.TabIndex = 3;
-			this.radioButton1.Text = "Check synchronization";
-			// 
-			// radioButton2
-			// 
-			this.radioButton2.Location = new System.Drawing.Point(24, 88);
-			this.radioButton2.Name = "radioButton2";
-			this.radioButton2.Size = new System.Drawing.Size(304, 24);
-			this.radioButton2.TabIndex = 2;
-			this.radioButton2.Text = "Resynchronize existing database";
-			// 
-			// radioButton3
-			// 
-			this.radioButton3.Checked = true;
-			this.radioButton3.Location = new System.Drawing.Point(24, 56);
-			this.radioButton3.Name = "radioButton3";
-			this.radioButton3.Size = new System.Drawing.Size(304, 24);
-			this.radioButton3.TabIndex = 1;
-			this.radioButton3.TabStop = true;
-			this.radioButton3.Text = "Synchronize and import data from disk";
-			// 
-			// label6
-			// 
-			this.label6.Location = new System.Drawing.Point(24, 16);
-			this.label6.Name = "label6";
-			this.label6.Size = new System.Drawing.Size(440, 24);
-			this.label6.TabIndex = 0;
-			this.label6.Text = "Please choose an action";
-			// 
 			// btnFinish
 			// 
 			this.btnFinish.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.btnFinish.Location = new System.Drawing.Point(512, 328);
+			this.btnFinish.Location = new System.Drawing.Point(472, 328);
 			this.btnFinish.Name = "btnFinish";
 			this.btnFinish.Size = new System.Drawing.Size(88, 32);
 			this.btnFinish.TabIndex = 7;
 			this.btnFinish.Text = "Finish";
 			this.btnFinish.Visible = false;
 			this.btnFinish.Click += new System.EventHandler(this.btnFinish_Click);
+			// 
+			// lblCurrentProcessingFile
+			// 
+			this.lblCurrentProcessingFile.ForeColor = System.Drawing.Color.Gray;
+			this.lblCurrentProcessingFile.Location = new System.Drawing.Point(16, 72);
+			this.lblCurrentProcessingFile.Name = "lblCurrentProcessingFile";
+			this.lblCurrentProcessingFile.Size = new System.Drawing.Size(456, 24);
+			this.lblCurrentProcessingFile.TabIndex = 0;
 			// 
 			// frmSynchronizeWizard
 			// 
@@ -464,7 +418,6 @@ namespace AIOForm
 			this.Controls.Add(this.btnCancel);
 			this.Controls.Add(this.panelLeft);
 			this.Controls.Add(this.panel1);
-			this.Controls.Add(this.panel4);
 			this.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
 			this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
 			this.Name = "frmSynchronizeWizard";
@@ -475,7 +428,6 @@ namespace AIOForm
 			this.panel1.ResumeLayout(false);
 			this.panel2.ResumeLayout(false);
 			this.panel3.ResumeLayout(false);
-			this.panel4.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -507,10 +459,10 @@ namespace AIOForm
 		private void btnNext_Click(object sender, System.EventArgs e)
 		{
 			step++;
+			ShowPanel(step);
 			switch (action) 
 			{
-				case ACTIONS.ACTION_SYNC:
-					ShowPanel(step);
+				case ACTIONS.ACTION_SYNC:					
 					if (step == 3) //Synchronization
 					{
 						//Get parameters for synch thread
@@ -533,7 +485,13 @@ namespace AIOForm
 						//progressBar.BeginInvoke(new RunInvoke(UpdateProgress));										
 					}
 					break;
-				case ACTIONS.ACTION_RESYNC:					
+				case ACTIONS.ACTION_RESYNC:
+					if (step == 2) 
+					{
+						ApplySynchronization();
+
+						RunProgressThread();
+					}
 					break;
 				case ACTIONS.ACTION_CHECKSYNC:
 					break;
@@ -611,9 +569,29 @@ namespace AIOForm
 			timer.Stop();
 		}
 		
+		//Apply Synchronization Thread
+		private void RunApplySynchThread() 
+		{
+			synchThread = new Thread(new ThreadStart(RunApplySynch));
+			synchThread.Start();
+		}
+
+		private void RunApplySynch() 
+		{
+			timer.Start();
+
+			//Apply synch to this folder
+			tree.ApplySynchronization(subroot, applySynchPath);
+
+			timer.Stop();
+		}
+
 		//Update Progress Thread--------------------------------------------
 		private void RunProgressThread() 
 		{
+			//Show progress panel
+			ShowPanel(3);
+
 			progressThread = new Thread(new ThreadStart(RunProgress));
 			progressThread.Start();
 		}
@@ -638,6 +616,9 @@ namespace AIOForm
 				if (AIOProgress.progressValue < 100)
 					progressBar.Value = AIOProgress.progressValue;
 				else progressBar.Value = 100;
+
+				if (tree.currentProcessingFile != null)
+					lblCurrentProcessingFile.Text = tree.currentProcessingFile;
 			}			
 			else	
 			{
@@ -655,6 +636,7 @@ namespace AIOForm
 			lblPercent.Text = progressBar.Value.ToString("") + "%";
 		}
 
+		//Handlers------------------------------------------------------
 		private void frmSynchronizeWizard_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			//Check to see if available to close
@@ -673,6 +655,21 @@ namespace AIOForm
 		{
 			step = 1;
 			ShowPanel(step);
+		}
+
+		//Resynch--------------------------------------------------------
+		//Apply synchronzation-------------------------------------------
+		private void ApplySynchronization() 
+		{
+			//Choose location
+			FolderBrowserDialog folder = new FolderBrowserDialog();
+			DialogResult res = folder.ShowDialog();
+			if (res.Equals(DialogResult.OK)) 
+			{
+				applySynchPath = folder.SelectedPath;
+				
+				RunApplySynchThread();
+			}
 		}
 	}
 }

@@ -867,8 +867,10 @@ namespace AIOForm
 
 		private void button1_Click(object sender, System.EventArgs e)
 		{
-			frmCDAddon addon = new frmCDAddon();
-			addon.ShowDialog();
+			frmSplash splash = new frmSplash();
+			splash.ShowDialog();
+			//frmCDAddon addon = new frmCDAddon();
+			//addon.ShowDialog();
 		}
 
 		private void button2_Click(object sender, System.EventArgs e)
