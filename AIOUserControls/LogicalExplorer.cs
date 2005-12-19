@@ -48,7 +48,7 @@ namespace AIOUserControls
 		private ContextState ctxState;
 
 		//Node to operate - cut - copy - paste
-		private AIONode nodeToOperate;
+		private AIONode []  nodeToOperateList;
 		private System.Windows.Forms.Label label1;
 		private System.Windows.Forms.ColumnHeader columnHeader2;
 		private System.Windows.Forms.ColumnHeader columnHeader3;
@@ -397,16 +397,28 @@ namespace AIOUserControls
 
 			if (nodeToAttach == null) return;
 
-			AIONode nodeToDrop = (AIONode)e.Data.GetData(typeof(AIONode));
+			//AIONode nodeToDrop = (AIONode)e.Data.GetData(typeof(AIONode));
+			AIONode [] nodeToDrops = (AIONode[])e.Data.GetData(typeof(AIONode[]));
 
 			//Must be a folder
 			if (nodeToAttach.data.isFile) return;
 
 			//Check if valid to move or copy
-			if (!tree.IsValidMoveCopy(nodeToDrop, nodeToAttach)) 
+			for (int i = 0;i<nodeToDrops.Length;i++) 
 			{
-				MessageBox.Show("Can't move or copy to sub folder.");
-				return;
+				AIONode nodeToDrop = nodeToDrops[i];
+
+				if (!tree.IsValidMoveCopy(nodeToDrop, nodeToAttach)) 
+				{
+					MessageBox.Show("Can't move or copy to sub folder.");
+					return;
+					//continue;
+				}
+
+				if (nodeToDrop.data.isFile == false && nodeToDrop.container == null) 
+				{
+					CreateContainerNode(nodeToDrop);
+				}
 			}
 
 			//Create container if not available
@@ -415,24 +427,20 @@ namespace AIOUserControls
 				CreateContainerNode(nodeToAttach);
 			}
 
-			if (nodeToDrop.data.isFile == false && nodeToDrop.container == null) 
-			{
-				CreateContainerNode(nodeToDrop);
-			}
 
 			if (e.Effect.Equals(DragDropEffects.Move)) //Move
 			{
 				//Logically move
-				MoveNode(nodeToDrop, nodeToAttach);					
+				MoveNode(nodeToDrops, nodeToAttach);					
 			} 
 			else 
 			{
 				if (e.Effect.Equals(DragDropEffects.Copy)) //Copy
 				{
 					//Logical copy
-					CopyNode(nodeToDrop, nodeToAttach);										
+					CopyNode(nodeToDrops, nodeToAttach);										
 				}
-			}
+			}			
 		}
 
 		private void treeView1_DragDrop(object sender, System.Windows.Forms.DragEventArgs e)
@@ -440,34 +448,42 @@ namespace AIOUserControls
 			//Cancel drag drop
 			IsDragDroping = false;			
 
+			if (treeView1.SelectedNode == null) return;
+
 			AIONode nodeToAttach = (AIONode)treeView1.SelectedNode.Tag;			
-			AIONode nodeToDrop = (AIONode)e.Data.GetData(typeof(AIONode));
+			AIONode [] nodeToDrops = (AIONode[])e.Data.GetData(typeof(AIONode[]));
 
 			//Check if valid to move or copy
-			if (!tree.IsValidMoveCopy(nodeToDrop, nodeToAttach)) {
-				MessageBox.Show("Can't move or copy to sub folder.");
-				return;
-			}
-
-			if (nodeToDrop.data.isFile == false && nodeToDrop.container == null) 
+			for (int i = 0;i<nodeToDrops.Length;i++) 
 			{
-				CreateContainerNode(nodeToDrop);
-			}
+				AIONode nodeToDrop = nodeToDrops[i];
 
+				if (!tree.IsValidMoveCopy(nodeToDrop, nodeToAttach)) 
+				{
+					MessageBox.Show("Can't move or copy to sub folder.");
+					return;
+					//continue;
+				}
+
+				if (nodeToDrop.data.isFile == false && nodeToDrop.container == null) 
+				{
+					CreateContainerNode(nodeToDrop);
+				}
+			}
 
 			if (e.Effect.Equals(DragDropEffects.Move)) //Move
 			{
-				MoveNode(nodeToDrop, nodeToAttach);
+				MoveNode(nodeToDrops, nodeToAttach);
 			} 
 			else 
 			{				
 				if (e.Effect.Equals(DragDropEffects.Copy)) //Copy
 				{
 					//Logical copy
-					CopyNode(nodeToDrop, nodeToAttach);			
+					CopyNode(nodeToDrops, nodeToAttach);			
 				}
 			}
-
+			
 		}
 
 		private TreeNode previousSelected = null; //Save previous selected node in DragDrop for Delete old node
@@ -478,8 +494,9 @@ namespace AIOUserControls
 			{				
 				if (listView1.SelectedIndices.Count == 0) return;
 
-				int index = listView1.SelectedIndices[0];
-				AIONode node = (AIONode)listView1.Items[index].Tag;
+				//int index = listView1.SelectedIndices[0];
+				//AIONode node = (AIONode)listView1.Items[index].Tag;
+				AIONode [] nodes = GetOperateNode(listView1);
 
 				IsDragDroping = true;
 				//ddType = DragDropType.LIST;
@@ -487,7 +504,7 @@ namespace AIOUserControls
 				previousSelected = treeView1.SelectedNode;
 
 				//Copy or Move				
-				listView1.DoDragDrop(node, DragDropEffects.Copy | DragDropEffects.Move);				
+				listView1.DoDragDrop(nodes, DragDropEffects.Copy | DragDropEffects.Move);				
 			}
 		}
 
@@ -537,10 +554,11 @@ namespace AIOUserControls
 						return;
 				}                
 
-				int index = listView1.SelectedIndices[0];
-				AIONode nodeToDelete = (AIONode)listView1.Items[index].Tag;
+				//int index = listView1.SelectedIndices[0];
+				//AIONode nodeToDelete = (AIONode)listView1.Items[index].Tag;
+				AIONode [] nodeToDeletes = (AIONode[])GetOperateNode(listView1);
 
-				DeleteNode(nodeToDelete);
+				DeleteNode(nodeToDeletes);
 			}
 
 			if (e.KeyCode == Keys.Enter)
@@ -568,8 +586,9 @@ namespace AIOUserControls
 			{				
 				TreeNode treeNode = treeView1.SelectedNode;
 				if (treeNode == null) return;
-
+				
 				AIONode node = (AIONode)treeNode.Tag;
+				AIONode [] nodes = new AIONode[] {node};
 
 				IsDragDroping = true;
 				//ddType = DragDropType.TREE;
@@ -577,7 +596,7 @@ namespace AIOUserControls
 				previousSelected = treeView1.SelectedNode;
 
 				//Copy or Move				
-				treeView1.DoDragDrop(node, DragDropEffects.Copy | DragDropEffects.Move);				
+				treeView1.DoDragDrop(nodes, DragDropEffects.Copy | DragDropEffects.Move);				
 			}
 		}
 
@@ -588,7 +607,8 @@ namespace AIOUserControls
 
 		private void listView1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e)
 		{			
-			IsDragDroping = false;			
+			IsDragDroping = false;	
+			listView1.MultiSelect = true;
 		}
 
 		private void listView1_DragOver(object sender, System.Windows.Forms.DragEventArgs e)
@@ -639,8 +659,9 @@ namespace AIOUserControls
 				}                
 								
 				AIONode nodeToDelete = (AIONode)node.Tag;		
-				
-				DeleteNode(nodeToDelete);
+				AIONode [] nodeToDeletes = new AIONode[] {nodeToDelete};
+
+				DeleteNode(nodeToDeletes);
 			}		
 		}
 
@@ -664,33 +685,44 @@ namespace AIOUserControls
 		{
 			if ((e.Button & MouseButtons.Right) == MouseButtons.Right) 
 			{
-				ListViewSelectAt(new Point(e.X, e.Y));
+				if (listView1.SelectedItems.Count == 0)
+					ListViewSelectAt(new Point(e.X, e.Y));
+
 				objSender = sender;
 				ShowContextMenu(listView1, e.X, e.Y);
 			}
 		}
 
 		//Get the node to operate in Cut-Copy-Paste
-		private AIONode GetOperateNode(object sender) 
+		private AIONode[] GetOperateNode(object sender) 
 		{
-			AIONode nodeToOperate = null;
+			AIONode [] nodeToOperateList = null;
+			//AIONode nodeToOperate = null;
 			if (sender.Equals(treeView1)) 
 			{
 				TreeNode treenode = treeView1.SelectedNode;
 				if (treenode == null) return null;
 			
 				//Save nodeToOperate
-				nodeToOperate = (AIONode)treenode.Tag;
+				//nodeToOperate = (AIONode)treenode.Tag;
+				//Tree node can't be multiple selected
+				nodeToOperateList = new AIONode[1];
+
+				nodeToOperateList[0] = (AIONode)treenode.Tag;
 			}
 			else 
-				if (sender.Equals(listView1)) 
+			if (sender.Equals(listView1)) 
 			{
 				if (listView1.SelectedItems.Count == 0) return null;
 				
-				//Save nodeToOperate
-				nodeToOperate = (AIONode)listView1.SelectedItems[0].Tag;
+				//Save nodeToOperate				
+				//nodeToOperate = (AIONode)listView1.SelectedItems[0].Tag;
+				//Save nodeToOperateList
+				nodeToOperateList = new AIONode[listView1.SelectedItems.Count];
+				for (int i = 0;i<listView1.SelectedItems.Count;i++)
+					nodeToOperateList[i] = (AIONode)listView1.SelectedItems[i].Tag;
 			}
-			return nodeToOperate;
+			return nodeToOperateList;
 		}
 
 		//x, y la client coordinate
@@ -704,6 +736,7 @@ namespace AIOUserControls
 
 			item.Selected = true;
 			listView1.Select();
+			//listView1.MultiSelect = true;
 		}
 
 		//x, y la client coordinate
@@ -716,9 +749,9 @@ namespace AIOUserControls
 		private void ctxCut_Click(object sender, System.EventArgs e)
 		{
 			//Save the node that currently clicked to cut
-			nodeToOperate = GetOperateNode(objSender);	
+			nodeToOperateList = GetOperateNode(objSender);	
 			//Not null is required
-			if (nodeToOperate == null) return;
+			if (nodeToOperateList == null) return;
 			//Change state
 			ctxState = ContextState.CTX_CUT;
 		}
@@ -726,65 +759,84 @@ namespace AIOUserControls
 		private void ctxCopy_Click(object sender, System.EventArgs e)
 		{
 			//Save the node that currently clicked to copy
-			nodeToOperate = GetOperateNode(objSender);	
+			nodeToOperateList = GetOperateNode(objSender);	
 			//Not null is required
-			if (nodeToOperate == null) return;
+			if (nodeToOperateList == null) return;
 			//Change state
 			ctxState = ContextState.CTX_COPY;
 		}
 
 		private void ctxPaste_Click(object sender, System.EventArgs e)
 		{
-			if (nodeToOperate == null) return;
+			if (nodeToOperateList == null) return;
 
 			//Get node to operate
-			AIONode destNode = GetOperateNode(objSender);
-			if (destNode == null) 
+			AIONode [] destNodes = ((AIONode[])GetOperateNode(objSender));
+			
+			if (destNodes == null) 
 			{
 				if (objSender.Equals(listView1)) //Neu ListView khong select
 				{
-					destNode = GetOperateNode(treeView1); //Sau khi lay o tree, destNode luon la mot thu muc
+					destNodes = ((AIONode[])GetOperateNode(treeView1)); //Sau khi lay o tree, destNode luon la mot thu muc
 				}
 				else return;
 			}
 			else
-			if (destNode.data.isFile) 
+			if (destNodes[0].data.isFile) 
 			{
 				//Change destNode to current category in treeView
-				destNode = GetOperateNode(treeView1); 
-				if (destNode == null) return;
+				destNodes = ((AIONode[])GetOperateNode(treeView1)); 
+				if (destNodes == null) return;
 			}
 
-			//Checking
-			if (!tree.IsValidMoveCopy(nodeToOperate, destNode))
+			if (destNodes.Length > 1)
 			{
-				return;
+				MessageBox.Show("Paste into " + destNodes[0].data.Name);
+			}
+
+			AIONode destNode = destNodes[0];
+			//Loop through operate node			
+			for (int i = 0;i<nodeToOperateList.Length;i++) 
+			{
+				AIONode nodeToOperate = nodeToOperateList[i];
+				//Checking
+				if (!tree.IsValidMoveCopy(nodeToOperate, destNode))
+				{
+					//continue;
+					return;
+				}
+
+				if (nodeToOperate.data.isFile == false && nodeToOperate.container == null) 
+				{
+					CreateContainerNode(nodeToOperate);
+				}
 			}
 
 			switch (ctxState) 
 			{
 				case ContextState.CTX_CUT:
-					MoveNode(nodeToOperate, destNode);
+					MoveNode(nodeToOperateList, destNode);
 
 					break;
-				
+			
 				case ContextState.CTX_COPY:
-					CopyNode(nodeToOperate, destNode);
+					CopyNode(nodeToOperateList, destNode);
 
 					break;
 			}
+			
+			//Change the state to READY when done
 			ctxState = ContextState.CTX_READY;
 		}
 
 		private void ctxDelete_Click(object sender, System.EventArgs e)
 		{
-			nodeToOperate = GetOperateNode(objSender);
+			nodeToOperateList = GetOperateNode(objSender);
 
-			if (nodeToOperate == null) return;
+			if (nodeToOperateList == null) return;
 
-			//Delete
-			DeleteNode(nodeToOperate);
-
+			DeleteNode(nodeToOperateList);
+			
 			ctxState = ContextState.CTX_READY;
 		}
 
@@ -893,75 +945,85 @@ namespace AIOUserControls
 			}
 		}
 
-		private void MoveNode(AIONode nodeToMove, AIONode nodeToAttach) 
+		private void MoveNode(AIONode [] nodeToMoves, AIONode nodeToAttach) 
 		{
-			//Logically
-			tree.MoveNode(nodeToMove, nodeToAttach);
-			//Change tree
-			if (nodeToMove.data.isFile == false) //Folder
+			for (int i = 0;i<nodeToMoves.Length;i++) 
 			{
-				TreeNode toMove = (TreeNode)nodeToMove.container;
-				TreeNode toAttach = (TreeNode)nodeToAttach.container;
-
-				AIONode parent = tree.GetParent(nodeToMove);
-				TreeNode parentNode = (TreeNode)parent.container;
-                
-				//Remove old
-				parentNode.Nodes.Remove(toMove);
-
-				//Insert new
-				InsertNode(toAttach, toMove);
-			}
-
-			//previousSelected
-			treeView1.SelectedNode = previousSelected;
-
-			//Update
-			UpdateListView();
-		}
-
-		private void CopyNode(AIONode nodeToCopy, AIONode nodeToAttach) 
-		{
-			//Logically
-			AIONode newCopy = tree.CopyNode(nodeToCopy, nodeToAttach);
-			//Change tree
-			if (nodeToCopy.data.isFile == false) //Folder
-			{				
-				TreeNode toAttach = (TreeNode)nodeToAttach.container;
-
-				TreeNode newCopyNode = CreateTreeNode(newCopy);
-				//Insert null child for new copy node
-				newCopyNode.Nodes.Insert(0, new TreeNode());
-
-				//Insert new
-				InsertNode(toAttach, newCopyNode);
-			}
-
-			//previousSelected
-			treeView1.SelectedNode = previousSelected;
-
-			//Update
-			UpdateListView();
-		}
-
-		private void DeleteNode(AIONode nodeToDelete) 
-		{
-			try 
-			{
-				tree.DeleteNode(nodeToDelete);
-
-				if (nodeToDelete.data.isFile == false) 
+				AIONode nodeToMove = nodeToMoves[i];
+				//Logically
+				tree.MoveNode(nodeToMove, nodeToAttach);
+				//Change tree
+				if (nodeToMove.data.isFile == false) //Folder
 				{
-					TreeNode toDelete = (TreeNode)nodeToDelete.container;
-					toDelete.Remove();
-				}
+					TreeNode toMove = (TreeNode)nodeToMove.container;
+					TreeNode toAttach = (TreeNode)nodeToAttach.container;
+					     
+					//Remove old
+					toMove.Remove();
 
-				UpdateListView();
+					//Insert new
+					InsertNode(toAttach, toMove);					
+				}
 			}
-			catch (Exception e) 
+
+			//previousSelected
+			treeView1.SelectedNode = previousSelected;
+
+			//Update
+			UpdateListView();
+		}
+
+		private void CopyNode(AIONode [] nodesToCopy, AIONode nodeToAttach) 
+		{
+			for (int i = 0;i<nodesToCopy.Length;i++) 
 			{
-				MessageBox.Show(e.Message);
+				AIONode nodeToCopy = nodesToCopy[i];
+
+				//Logically
+				AIONode newCopy = tree.CopyNode(nodeToCopy, nodeToAttach);
+				//Change tree
+				if (nodeToCopy.data.isFile == false) //Folder
+				{				
+					TreeNode toAttach = (TreeNode)nodeToAttach.container;
+
+					TreeNode newCopyNode = CreateTreeNode(newCopy);
+					//Insert null child for new copy node
+					newCopyNode.Nodes.Insert(0, new TreeNode());
+
+					//Insert new
+					InsertNode(toAttach, newCopyNode);
+				}
 			}
+			//previousSelected
+			treeView1.SelectedNode = previousSelected;
+
+			//Update
+			UpdateListView();
+		}
+
+		private void DeleteNode(AIONode [] nodesToDelete) 
+		{
+			for (int i = 0;i<nodesToDelete.Length;i++) 
+			{
+				AIONode nodeToDelete = nodesToDelete[i];
+
+				try 
+				{				
+					tree.DeleteNode(nodeToDelete);
+
+					if (nodeToDelete.data.isFile == false) 
+					{
+						TreeNode toDelete = (TreeNode)nodeToDelete.container;
+						if (toDelete != null)
+							toDelete.Remove();
+					}					
+				}
+				catch (Exception e) 
+				{
+					MessageBox.Show(e.Message);
+				}
+			}
+			UpdateListView();
 		}
 
 		private void CreateContainerNode(AIONode node) 

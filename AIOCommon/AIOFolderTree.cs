@@ -97,6 +97,9 @@ namespace AIOCommon
 		private bool isProcessing = false;
 		public string currentProcessingFile = "";
 
+		//Overwrite
+		private bool bOverwrite = true;
+
 		public int Size
 		{
 			get
@@ -938,6 +941,10 @@ namespace AIOCommon
 			dir.CreateSubdirectory(subroot.data.Name);
 			
 			string parentPath = folderPath + @"\" + subroot.data.Name;
+			dir = new DirectoryInfo(parentPath);
+			if (dir.Exists == false)
+				dir.Create();
+
 			ApplySynchronization_R(subroot.childNode, parentPath);
 
 			isProcessing = false;
@@ -946,34 +953,40 @@ namespace AIOCommon
 		private void ApplySynchronization_R(AIONode subroot, string parentPath) 
 		{
 			if (subroot == null) return;
+/*
+			if (subroot.childNode != null) 
+			{
+				DirectoryInfo dir = new DirectoryInfo(parentPath + @"\" + subroot.data.Name);
+				if (dir.Exists == false)
+					dir.Create();
+
+				ApplySynchronization_R(subroot.childNode, parentPath + @"\" + subroot.data.Name);
+			}*/
 			
-			ApplySynchronization_R(subroot.childNode, parentPath + @"\" + subroot.data.Name);
-
 			//Apply to subroot
-			AIONode current = subroot;
-
+			AIONode current = subroot;			
+			
 			while (current != null) 
 			{
 				//Apply to folder
 				if (current.data.isFile == false) 
 				{
-					if (current.Equals(subroot) == false)
-						ApplySynchronization(current, parentPath);
-				}
-				else 
-				{
-					//Create folder for current
-					DirectoryInfo dir = new DirectoryInfo(parentPath);
+					DirectoryInfo dir = new DirectoryInfo(parentPath + @"\" + current.data.Name);
 					if (dir.Exists == false)
 						dir.Create();
 
+					//if (current.Equals(subroot) == false)
+					ApplySynchronization_R(current.childNode, parentPath + @"\" + current.data.Name);
+				}
+				else 
+				{					
 					//Get file path
 					AIOCommonInfo info = controller.Select(current.data.ID);
 					currentProcessingFile = info.path;
 
 					//Copy the file to new directory
 					FileInfo file = new FileInfo(info.path);
-					file.CopyTo(parentPath+@"\"+file.Name);
+					file.CopyTo(parentPath+@"\"+file.Name, bOverwrite);
 				}
 				//Next
 				current = current.nextNode;

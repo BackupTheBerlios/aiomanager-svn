@@ -723,13 +723,16 @@ namespace AIOForm
 		public void ImportResources() 
 		{
 			OpenFileDialog fileDlg = new OpenFileDialog();
+			fileDlg.Multiselect = true;
+			
 			DialogResult result = fileDlg.ShowDialog();
 			if (result.Equals(DialogResult.OK)) 
 			{
 				if (fileDlg.CheckFileExists) 
 				{
-					string filename = fileDlg.FileName;
-					logicalExplorer1.InsertFileIntoSelectedNode(filename);
+					string [] filenames = fileDlg.FileNames;
+					for (int i = 0;i<filenames.Length;i++)
+						logicalExplorer1.InsertFileIntoSelectedNode(filenames[i]);
 				}
 				else 
 				{
