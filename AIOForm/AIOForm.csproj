@@ -316,6 +316,10 @@
                     RelPath = "Splash.resources"
                     BuildAction = "EmbeddedResource"
                 />
+                <File
+                    RelPath = "Toolbar.resources"
+                    BuildAction = "EmbeddedResource"
+                />
             </Include>
         </Files>
     </CSHARP>

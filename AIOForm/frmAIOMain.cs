@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Windows.Forms;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+using System.Resources;
 using AIOCommon;
 
 namespace AIOForm
@@ -147,7 +148,6 @@ namespace AIOForm
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(frmAIOMain));
 			this.mainMenu = new System.Windows.Forms.MainMenu();
 			this.mnuFile = new System.Windows.Forms.MenuItem();
 			this.mnuImportResources = new System.Windows.Forms.MenuItem();
@@ -202,6 +202,8 @@ namespace AIOForm
 			this.picModule = new System.Windows.Forms.PictureBox();
 			this.tabControl1 = new System.Windows.Forms.TabControl();
 			this.tabPage1 = new System.Windows.Forms.TabPage();
+			this.lblSize = new System.Windows.Forms.Label();
+			this.label1 = new System.Windows.Forms.Label();
 			this.button2 = new System.Windows.Forms.Button();
 			this.button1 = new System.Windows.Forms.Button();
 			this.tabPage2 = new System.Windows.Forms.TabPage();
@@ -211,8 +213,6 @@ namespace AIOForm
 			this.progressBar1 = new System.Windows.Forms.ProgressBar();
 			this.panelContent = new System.Windows.Forms.Panel();
 			this.logicalExplorer1 = new AIOUserControls.LogicalExplorer();
-			this.label1 = new System.Windows.Forms.Label();
-			this.lblSize = new System.Windows.Forms.Label();
 			this.tabControl1.SuspendLayout();
 			this.tabPage1.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.statusBarPanel1)).BeginInit();
@@ -548,7 +548,6 @@ namespace AIOForm
 			// 
 			this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
 			this.imageList1.ImageSize = new System.Drawing.Size(32, 32);
-			this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
 			this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
 			// 
 			// picModule
@@ -585,6 +584,21 @@ namespace AIOForm
 			this.tabPage1.Size = new System.Drawing.Size(600, 75);
 			this.tabPage1.TabIndex = 0;
 			this.tabPage1.Text = "Details";
+			// 
+			// lblSize
+			// 
+			this.lblSize.Location = new System.Drawing.Point(48, 8);
+			this.lblSize.Name = "lblSize";
+			this.lblSize.Size = new System.Drawing.Size(88, 24);
+			this.lblSize.TabIndex = 3;
+			// 
+			// label1
+			// 
+			this.label1.Location = new System.Drawing.Point(8, 8);
+			this.label1.Name = "label1";
+			this.label1.Size = new System.Drawing.Size(40, 24);
+			this.label1.TabIndex = 2;
+			this.label1.Text = "Size";
 			// 
 			// button2
 			// 
@@ -663,21 +677,6 @@ namespace AIOForm
 			this.logicalExplorer1.Name = "logicalExplorer1";
 			this.logicalExplorer1.Size = new System.Drawing.Size(608, 245);
 			this.logicalExplorer1.TabIndex = 0;
-			// 
-			// label1
-			// 
-			this.label1.Location = new System.Drawing.Point(8, 8);
-			this.label1.Name = "label1";
-			this.label1.Size = new System.Drawing.Size(40, 24);
-			this.label1.TabIndex = 2;
-			this.label1.Text = "Size";
-			// 
-			// lblSize
-			// 
-			this.lblSize.Location = new System.Drawing.Point(48, 8);
-			this.lblSize.Name = "lblSize";
-			this.lblSize.Size = new System.Drawing.Size(88, 24);
-			this.lblSize.TabIndex = 3;
 			// 
 			// frmAIOMain
 			// 
@@ -907,6 +906,8 @@ namespace AIOForm
 		{
 			try
 			{
+				//Load all resources
+				LoadResources();
 				//Clear all old database
 				aioDb.ClearAll(curModule);
 				//LoadTree();	
@@ -939,6 +940,27 @@ namespace AIOForm
 					break;
 			}
 			
+		}
+
+		//Load all resources
+		private void LoadResources() 
+		{
+			ResourceManager resMan = new ResourceManager("AIOForm.Toolbar", this.GetType().Assembly);
+			this.imageList1.Images.Add((Image)resMan.GetObject("Import"));
+			this.imageList1.Images.Add((Image)resMan.GetObject("Synchronize"));
+			this.imageList1.Images.Add((Image)resMan.GetObject("Search"));
+			this.imageList1.Images.Add((Image)resMan.GetObject("View"));
+			this.imageList1.Images.Add((Image)resMan.GetObject("Preferences"));
+			this.imageList1.Images.Add((Image)resMan.GetObject("Help"));			
+
+			//Load button image
+			int n = 0;
+			for (int i = 0;i<toolbarMain.Buttons.Count;i++) 
+			{
+				if (toolbarMain.Buttons[i].Text.Length > 0) 
+					toolbarMain.Buttons[i].ImageIndex = n++;				
+			}
+
 		}
 	}
 }
