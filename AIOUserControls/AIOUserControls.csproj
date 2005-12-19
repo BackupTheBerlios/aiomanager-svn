@@ -134,6 +134,10 @@
                     BuildAction = "EmbeddedResource"
                 />
                 <File
+                    RelPath = "LogicalExplorerResource.resources"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "RatingField.cs"
                     SubType = "UserControl"
                     BuildAction = "Compile"

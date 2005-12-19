@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Data;
 using System.Windows.Forms;
 using System.IO;
+using System.Resources;
 using AIOCommon;
 
 namespace AIOUserControls
@@ -96,9 +97,11 @@ namespace AIOUserControls
 		private void InitializeComponent()
 		{
 			this.components = new System.ComponentModel.Container();
-			System.Resources.ResourceManager resources = new System.Resources.ResourceManager(typeof(LogicalExplorer));
 			this.listView1 = new System.Windows.Forms.ListView();
 			this.columnHeader1 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
+			this.columnHeader4 = new System.Windows.Forms.ColumnHeader();
 			this.imageList1 = new System.Windows.Forms.ImageList(this.components);
 			this.treeView1 = new System.Windows.Forms.TreeView();
 			this.splitter1 = new System.Windows.Forms.Splitter();
@@ -113,9 +116,6 @@ namespace AIOUserControls
 			this.menuItem7 = new System.Windows.Forms.MenuItem();
 			this.ctxDelete = new System.Windows.Forms.MenuItem();
 			this.label1 = new System.Windows.Forms.Label();
-			this.columnHeader2 = new System.Windows.Forms.ColumnHeader();
-			this.columnHeader3 = new System.Windows.Forms.ColumnHeader();
-			this.columnHeader4 = new System.Windows.Forms.ColumnHeader();
 			this.SuspendLayout();
 			// 
 			// listView1
@@ -152,11 +152,25 @@ namespace AIOUserControls
 			this.columnHeader1.Text = "File Name";
 			this.columnHeader1.Width = 182;
 			// 
+			// columnHeader2
+			// 
+			this.columnHeader2.Text = "Ratings";
+			this.columnHeader2.Width = 105;
+			// 
+			// columnHeader3
+			// 
+			this.columnHeader3.Text = "Comment";
+			this.columnHeader3.Width = 104;
+			// 
+			// columnHeader4
+			// 
+			this.columnHeader4.Text = "Path";
+			this.columnHeader4.Width = 100;
+			// 
 			// imageList1
 			// 
 			this.imageList1.ColorDepth = System.Windows.Forms.ColorDepth.Depth32Bit;
 			this.imageList1.ImageSize = new System.Drawing.Size(16, 16);
-			this.imageList1.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("imageList1.ImageStream")));
 			this.imageList1.TransparentColor = System.Drawing.Color.Transparent;
 			// 
 			// treeView1
@@ -167,7 +181,6 @@ namespace AIOUserControls
 			this.treeView1.LabelEdit = true;
 			this.treeView1.Location = new System.Drawing.Point(0, 0);
 			this.treeView1.Name = "treeView1";
-			this.treeView1.SelectedImageIndex = 2;
 			this.treeView1.Size = new System.Drawing.Size(152, 312);
 			this.treeView1.TabIndex = 9;
 			this.treeView1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.treeView1_KeyDown);
@@ -260,21 +273,6 @@ namespace AIOUserControls
 			this.label1.TabIndex = 12;
 			this.label1.Text = "label1";
 			// 
-			// columnHeader2
-			// 
-			this.columnHeader2.Text = "Ratings";
-			this.columnHeader2.Width = 105;
-			// 
-			// columnHeader3
-			// 
-			this.columnHeader3.Text = "Comment";
-			this.columnHeader3.Width = 104;
-			// 
-			// columnHeader4
-			// 
-			this.columnHeader4.Text = "Path";
-			this.columnHeader4.Width = 100;
-			// 
 			// LogicalExplorer
 			// 
 			this.Controls.Add(this.label1);
@@ -284,6 +282,7 @@ namespace AIOUserControls
 			this.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
 			this.Name = "LogicalExplorer";
 			this.Size = new System.Drawing.Size(608, 312);
+			this.Load += new System.EventHandler(this.LogicalExplorer_Load);
 			this.ResumeLayout(false);
 
 		}
@@ -1015,6 +1014,21 @@ namespace AIOUserControls
 			treeView1.Invoke(new InsertNodeDele(InsertNode), new object[] {parentnode, treenode});
 		}
 
-		
+		//Load all resources
+		private void LoadResources() 
+		{
+			ResourceManager resMan = new ResourceManager("AIOUserControls.LogicalExplorerResource", this.GetType().Assembly);
+			this.imageList1.Images.Add((Image)resMan.GetObject("Folder"));
+			this.imageList1.Images.Add((Image)resMan.GetObject("File"));
+			this.imageList1.Images.Add((Image)resMan.GetObject("CurrentFolder"));
+
+			//Load selected icon for tree
+			treeView1.SelectedImageIndex = 2;
+		}
+
+		private void LogicalExplorer_Load(object sender, System.EventArgs e)
+		{
+			LoadResources();
+		}		
 	}
 }
