@@ -149,6 +149,16 @@
                     BuildAction = "Compile"
                 />
                 <File
+                    RelPath = "AIOMusic.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
+                    RelPath = "AIOMusicController.cs"
+                    SubType = "Code"
+                    BuildAction = "Compile"
+                />
+                <File
                     RelPath = "AIOProgress.cs"
                     SubType = "Code"
                     BuildAction = "Compile"
