@@ -3,6 +3,8 @@ using System.Drawing;
 using System.Collections;
 using System.ComponentModel;
 using System.Windows.Forms;
+using System.Data;
+using AIOCommon;
 
 namespace AIOForm
 {
@@ -12,37 +14,50 @@ namespace AIOForm
 	public class frmMovieInfo : System.Windows.Forms.Form
 	{
 		private System.Windows.Forms.Button button8;
-		private System.Windows.Forms.Button button7;
-		private System.Windows.Forms.Button button6;
-		private System.Windows.Forms.Button button5;
-		private AIOForm.frmCommonInfo frmCommonInfo1;
 		private System.Windows.Forms.Button button4;
 		private System.Windows.Forms.PictureBox pictureBox1;
 		private System.Windows.Forms.Label label6;
-		private System.Windows.Forms.NumericUpDown numericUpDown1;
 		private System.Windows.Forms.Label label5;
-		private System.Windows.Forms.Button button3;
-		private System.Windows.Forms.ComboBox comboBox4;
 		private System.Windows.Forms.Label label4;
-		private System.Windows.Forms.Button button2;
-		private System.Windows.Forms.ComboBox comboBox3;
 		private System.Windows.Forms.Label label3;
-		private System.Windows.Forms.Button button1;
-		private System.Windows.Forms.ComboBox comboBox2;
 		private System.Windows.Forms.Label label2;
-		private System.Windows.Forms.ComboBox comboBox1;
 		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Button btnClose;
+		private System.Windows.Forms.Button btnClear;
+		private System.Windows.Forms.Button btnUpdate;
+		private AIOForm.frmCommonInfo commonInfo;
+		private System.Windows.Forms.NumericUpDown nudYear;
+		private System.Windows.Forms.Button btnEditDirector;
+		private System.Windows.Forms.ComboBox cmbDirector;
+		private System.Windows.Forms.Button btnEditActress;
+		private System.Windows.Forms.ComboBox cmbActress;
+		private System.Windows.Forms.Button btnEditActor;
+		private System.Windows.Forms.ComboBox cmbActor;
+		private System.Windows.Forms.ComboBox cmbMovieName;
 		/// <summary>
 		/// Required designer variable.
 		/// </summary>
 		private System.ComponentModel.Container components = null;
 
-		public frmMovieInfo()
+		private AIODatabase aioDb;
+		private DataTable DTDirector;
+		private DataTable DTActor;
+		private DataTable DTActress;
+		private AIOMovie movie;
+		private AIOMovieController movieController;
+
+
+		public frmMovieInfo( AIODatabase aioDb, AIOCommonController controller, string ID )
 		{
 			//
 			// Required for Windows Form Designer support
 			//
 			InitializeComponent();
+			this.aioDb = aioDb;
+			this.movieController = ( AIOMovieController )controller;
+			this.movie = ( AIOMovie )this.movieController.Select( ID );
+
+			nudYear.Maximum = DateTime.Now.Year;
 
 			//
 			// TODO: Add any constructor code after InitializeComponent call
@@ -72,27 +87,27 @@ namespace AIOForm
 		private void InitializeComponent()
 		{
 			this.button8 = new System.Windows.Forms.Button();
-			this.button7 = new System.Windows.Forms.Button();
-			this.button6 = new System.Windows.Forms.Button();
-			this.button5 = new System.Windows.Forms.Button();
-			this.frmCommonInfo1 = new AIOForm.frmCommonInfo();
+			this.btnClose = new System.Windows.Forms.Button();
+			this.btnClear = new System.Windows.Forms.Button();
+			this.btnUpdate = new System.Windows.Forms.Button();
+			this.commonInfo = new AIOForm.frmCommonInfo();
 			this.button4 = new System.Windows.Forms.Button();
 			this.pictureBox1 = new System.Windows.Forms.PictureBox();
 			this.label6 = new System.Windows.Forms.Label();
-			this.numericUpDown1 = new System.Windows.Forms.NumericUpDown();
+			this.nudYear = new System.Windows.Forms.NumericUpDown();
 			this.label5 = new System.Windows.Forms.Label();
-			this.button3 = new System.Windows.Forms.Button();
-			this.comboBox4 = new System.Windows.Forms.ComboBox();
+			this.btnEditDirector = new System.Windows.Forms.Button();
+			this.cmbDirector = new System.Windows.Forms.ComboBox();
 			this.label4 = new System.Windows.Forms.Label();
-			this.button2 = new System.Windows.Forms.Button();
-			this.comboBox3 = new System.Windows.Forms.ComboBox();
+			this.btnEditActress = new System.Windows.Forms.Button();
+			this.cmbActress = new System.Windows.Forms.ComboBox();
 			this.label3 = new System.Windows.Forms.Label();
-			this.button1 = new System.Windows.Forms.Button();
-			this.comboBox2 = new System.Windows.Forms.ComboBox();
+			this.btnEditActor = new System.Windows.Forms.Button();
+			this.cmbActor = new System.Windows.Forms.ComboBox();
 			this.label2 = new System.Windows.Forms.Label();
-			this.comboBox1 = new System.Windows.Forms.ComboBox();
+			this.cmbMovieName = new System.Windows.Forms.ComboBox();
 			this.label1 = new System.Windows.Forms.Label();
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+			((System.ComponentModel.ISupportInitialize)(this.nudYear)).BeginInit();
 			this.SuspendLayout();
 			// 
 			// button8
@@ -104,40 +119,40 @@ namespace AIOForm
 			this.button8.TabIndex = 42;
 			this.button8.Text = "Apply";
 			// 
-			// button7
+			// btnClose
 			// 
-			this.button7.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button7.Location = new System.Drawing.Point(416, 408);
-			this.button7.Name = "button7";
-			this.button7.Size = new System.Drawing.Size(104, 32);
-			this.button7.TabIndex = 41;
-			this.button7.Text = "Cancel";
+			this.btnClose.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnClose.Location = new System.Drawing.Point(416, 408);
+			this.btnClose.Name = "btnClose";
+			this.btnClose.Size = new System.Drawing.Size(104, 32);
+			this.btnClose.TabIndex = 41;
+			this.btnClose.Text = "Close";
 			// 
-			// button6
+			// btnClear
 			// 
-			this.button6.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button6.Location = new System.Drawing.Point(120, 408);
-			this.button6.Name = "button6";
-			this.button6.Size = new System.Drawing.Size(104, 32);
-			this.button6.TabIndex = 40;
-			this.button6.Text = "Clear";
+			this.btnClear.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnClear.Location = new System.Drawing.Point(120, 408);
+			this.btnClear.Name = "btnClear";
+			this.btnClear.Size = new System.Drawing.Size(104, 32);
+			this.btnClear.TabIndex = 40;
+			this.btnClear.Text = "Clear";
 			// 
-			// button5
+			// btnUpdate
 			// 
-			this.button5.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button5.Location = new System.Drawing.Point(8, 408);
-			this.button5.Name = "button5";
-			this.button5.Size = new System.Drawing.Size(104, 32);
-			this.button5.TabIndex = 39;
-			this.button5.Text = "Update";
+			this.btnUpdate.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnUpdate.Location = new System.Drawing.Point(8, 408);
+			this.btnUpdate.Name = "btnUpdate";
+			this.btnUpdate.Size = new System.Drawing.Size(104, 32);
+			this.btnUpdate.TabIndex = 39;
+			this.btnUpdate.Text = "Update";
 			// 
-			// frmCommonInfo1
+			// commonInfo
 			// 
-			this.frmCommonInfo1.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
-			this.frmCommonInfo1.Location = new System.Drawing.Point(8, 232);
-			this.frmCommonInfo1.Name = "frmCommonInfo1";
-			this.frmCommonInfo1.Size = new System.Drawing.Size(520, 160);
-			this.frmCommonInfo1.TabIndex = 38;
+			this.commonInfo.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
+			this.commonInfo.Location = new System.Drawing.Point(8, 232);
+			this.commonInfo.Name = "commonInfo";
+			this.commonInfo.Size = new System.Drawing.Size(520, 160);
+			this.commonInfo.TabIndex = 38;
 			// 
 			// button4
 			// 
@@ -165,26 +180,26 @@ namespace AIOForm
 			this.label6.TabIndex = 35;
 			this.label6.Text = "Poster";
 			// 
-			// numericUpDown1
+			// nudYear
 			// 
-			this.numericUpDown1.Location = new System.Drawing.Point(64, 136);
-			this.numericUpDown1.Maximum = new System.Decimal(new int[] {
-																		   2999,
-																		   0,
-																		   0,
-																		   0});
-			this.numericUpDown1.Minimum = new System.Decimal(new int[] {
-																		   1900,
-																		   0,
-																		   0,
-																		   0});
-			this.numericUpDown1.Name = "numericUpDown1";
-			this.numericUpDown1.TabIndex = 34;
-			this.numericUpDown1.Value = new System.Decimal(new int[] {
-																		 2005,
-																		 0,
-																		 0,
-																		 0});
+			this.nudYear.Location = new System.Drawing.Point(64, 136);
+			this.nudYear.Maximum = new System.Decimal(new int[] {
+																	2999,
+																	0,
+																	0,
+																	0});
+			this.nudYear.Minimum = new System.Decimal(new int[] {
+																	1900,
+																	0,
+																	0,
+																	0});
+			this.nudYear.Name = "nudYear";
+			this.nudYear.TabIndex = 34;
+			this.nudYear.Value = new System.Decimal(new int[] {
+																  2005,
+																  0,
+																  0,
+																  0});
 			// 
 			// label5
 			// 
@@ -194,21 +209,21 @@ namespace AIOForm
 			this.label5.TabIndex = 33;
 			this.label5.Text = "Year";
 			// 
-			// button3
+			// btnEditDirector
 			// 
-			this.button3.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button3.Location = new System.Drawing.Point(464, 40);
-			this.button3.Name = "button3";
-			this.button3.Size = new System.Drawing.Size(56, 24);
-			this.button3.TabIndex = 32;
-			this.button3.Text = "Edit";
+			this.btnEditDirector.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnEditDirector.Location = new System.Drawing.Point(464, 40);
+			this.btnEditDirector.Name = "btnEditDirector";
+			this.btnEditDirector.Size = new System.Drawing.Size(56, 24);
+			this.btnEditDirector.TabIndex = 32;
+			this.btnEditDirector.Text = "Edit";
 			// 
-			// comboBox4
+			// cmbDirector
 			// 
-			this.comboBox4.Location = new System.Drawing.Point(64, 40);
-			this.comboBox4.Name = "comboBox4";
-			this.comboBox4.Size = new System.Drawing.Size(392, 24);
-			this.comboBox4.TabIndex = 31;
+			this.cmbDirector.Location = new System.Drawing.Point(64, 40);
+			this.cmbDirector.Name = "cmbDirector";
+			this.cmbDirector.Size = new System.Drawing.Size(392, 24);
+			this.cmbDirector.TabIndex = 31;
 			// 
 			// label4
 			// 
@@ -218,21 +233,21 @@ namespace AIOForm
 			this.label4.TabIndex = 30;
 			this.label4.Text = "Director";
 			// 
-			// button2
+			// btnEditActress
 			// 
-			this.button2.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button2.Location = new System.Drawing.Point(272, 104);
-			this.button2.Name = "button2";
-			this.button2.Size = new System.Drawing.Size(56, 24);
-			this.button2.TabIndex = 29;
-			this.button2.Text = "Edit";
+			this.btnEditActress.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnEditActress.Location = new System.Drawing.Point(272, 104);
+			this.btnEditActress.Name = "btnEditActress";
+			this.btnEditActress.Size = new System.Drawing.Size(56, 24);
+			this.btnEditActress.TabIndex = 29;
+			this.btnEditActress.Text = "Edit";
 			// 
-			// comboBox3
+			// cmbActress
 			// 
-			this.comboBox3.Location = new System.Drawing.Point(64, 104);
-			this.comboBox3.Name = "comboBox3";
-			this.comboBox3.Size = new System.Drawing.Size(200, 24);
-			this.comboBox3.TabIndex = 28;
+			this.cmbActress.Location = new System.Drawing.Point(64, 104);
+			this.cmbActress.Name = "cmbActress";
+			this.cmbActress.Size = new System.Drawing.Size(200, 24);
+			this.cmbActress.TabIndex = 28;
 			// 
 			// label3
 			// 
@@ -242,21 +257,21 @@ namespace AIOForm
 			this.label3.TabIndex = 27;
 			this.label3.Text = "Actress";
 			// 
-			// button1
+			// btnEditActor
 			// 
-			this.button1.FlatStyle = System.Windows.Forms.FlatStyle.System;
-			this.button1.Location = new System.Drawing.Point(272, 72);
-			this.button1.Name = "button1";
-			this.button1.Size = new System.Drawing.Size(56, 24);
-			this.button1.TabIndex = 26;
-			this.button1.Text = "Edit";
+			this.btnEditActor.FlatStyle = System.Windows.Forms.FlatStyle.System;
+			this.btnEditActor.Location = new System.Drawing.Point(272, 72);
+			this.btnEditActor.Name = "btnEditActor";
+			this.btnEditActor.Size = new System.Drawing.Size(56, 24);
+			this.btnEditActor.TabIndex = 26;
+			this.btnEditActor.Text = "Edit";
 			// 
-			// comboBox2
+			// cmbActor
 			// 
-			this.comboBox2.Location = new System.Drawing.Point(64, 72);
-			this.comboBox2.Name = "comboBox2";
-			this.comboBox2.Size = new System.Drawing.Size(200, 24);
-			this.comboBox2.TabIndex = 25;
+			this.cmbActor.Location = new System.Drawing.Point(64, 72);
+			this.cmbActor.Name = "cmbActor";
+			this.cmbActor.Size = new System.Drawing.Size(200, 24);
+			this.cmbActor.TabIndex = 25;
 			// 
 			// label2
 			// 
@@ -266,12 +281,12 @@ namespace AIOForm
 			this.label2.TabIndex = 24;
 			this.label2.Text = "Actor";
 			// 
-			// comboBox1
+			// cmbMovieName
 			// 
-			this.comboBox1.Location = new System.Drawing.Point(64, 8);
-			this.comboBox1.Name = "comboBox1";
-			this.comboBox1.Size = new System.Drawing.Size(456, 24);
-			this.comboBox1.TabIndex = 23;
+			this.cmbMovieName.Location = new System.Drawing.Point(64, 8);
+			this.cmbMovieName.Name = "cmbMovieName";
+			this.cmbMovieName.Size = new System.Drawing.Size(456, 24);
+			this.cmbMovieName.TabIndex = 23;
 			// 
 			// label1
 			// 
@@ -279,37 +294,37 @@ namespace AIOForm
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(48, 24);
 			this.label1.TabIndex = 22;
-			this.label1.Text = "Title";
+			this.label1.Text = "Name";
 			// 
 			// frmMovieInfo
 			// 
 			this.AutoScaleBaseSize = new System.Drawing.Size(6, 16);
 			this.ClientSize = new System.Drawing.Size(528, 450);
 			this.Controls.Add(this.button8);
-			this.Controls.Add(this.button7);
-			this.Controls.Add(this.button6);
-			this.Controls.Add(this.button5);
-			this.Controls.Add(this.frmCommonInfo1);
+			this.Controls.Add(this.btnClose);
+			this.Controls.Add(this.btnClear);
+			this.Controls.Add(this.btnUpdate);
+			this.Controls.Add(this.commonInfo);
 			this.Controls.Add(this.button4);
 			this.Controls.Add(this.pictureBox1);
 			this.Controls.Add(this.label6);
-			this.Controls.Add(this.numericUpDown1);
+			this.Controls.Add(this.nudYear);
 			this.Controls.Add(this.label5);
-			this.Controls.Add(this.button3);
-			this.Controls.Add(this.comboBox4);
+			this.Controls.Add(this.btnEditDirector);
+			this.Controls.Add(this.cmbDirector);
 			this.Controls.Add(this.label4);
-			this.Controls.Add(this.button2);
-			this.Controls.Add(this.comboBox3);
+			this.Controls.Add(this.btnEditActress);
+			this.Controls.Add(this.cmbActress);
 			this.Controls.Add(this.label3);
-			this.Controls.Add(this.button1);
-			this.Controls.Add(this.comboBox2);
+			this.Controls.Add(this.btnEditActor);
+			this.Controls.Add(this.cmbActor);
 			this.Controls.Add(this.label2);
-			this.Controls.Add(this.comboBox1);
+			this.Controls.Add(this.cmbMovieName);
 			this.Controls.Add(this.label1);
 			this.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((System.Byte)(0)));
 			this.Name = "frmMovieInfo";
 			this.Text = "Update Movie Information";
-			((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+			((System.ComponentModel.ISupportInitialize)(this.nudYear)).EndInit();
 			this.ResumeLayout(false);
 
 		}

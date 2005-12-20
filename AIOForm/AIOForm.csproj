@@ -110,6 +110,10 @@
         <Files>
             <Include>
                 <File
+                    RelPath = "AIOManager.mdb"
+                    BuildAction = "EmbeddedResource"
+                />
+                <File
                     RelPath = "App.ico"
                     BuildAction = "Content"
                 />
